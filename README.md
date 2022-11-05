@@ -1,3 +1,3 @@
-# Graphic value
+# Bezier curve
 
-Graphic value editor/generator
+Bezier curve editor/generator
