@@ -1,8 +1,25 @@
-from pygame import display, font, mouse
-from math import sqrt
+from pygame import display, font, mouse, draw
+from curve import generate_curve
+from typing import Sequence
+from math import dist
 import pygame
+import theme
 
-import generator
+
+def fix_end_vertexes(start_vertex: Sequence, end_vertex: Sequence, min_dist: float | int):
+    if dist(start_vertex, end_vertex) < min_dist:
+        new_start_vertex, new_end_vertex = [*start_vertex], [*end_vertex]
+
+        if abs(start_vertex[0] - end_vertex[0]) < min_dist:
+            if start_vertex[0] <= end_vertex[0]:
+                new_end_vertex[0] = start_vertex[0] + min_dist
+            else:
+                new_start_vertex[0] = end_vertex[0] + min_dist
+
+        return new_start_vertex, new_end_vertex
+
+    return start_vertex, end_vertex
+
 
 pygame.init()
 font.init()
@@ -14,97 +31,138 @@ surface = display.get_surface()
 clock = pygame.time.Clock()
 basefont = font.Font(None, 20)
 
-is_pressed = False
-start, stop = 0, 113
+# Other values
+start_pos = end_pos = interact_vertex_index = None
+vertexes = []
 
-colors = (0xf44336, 0x3f51b5, 0xffc107)
-is_num_pressed = [False, False, False]
-coefficients = [(2.1, 0.15), (None, None), (2.1, 0.15)]
+# Constants
+SCALE_INTERVAL = 100
+RADIUS = 7
+WIDTH = 1
 
-vertexes = [(0, 0), (0, 200), (350, 900), (600, 100), (600, 700)]
+STATUS_NOT_PRESSED = 0
+STATUS_DOWN = 1
+STATUS_HOLD = 2
+STATUS_UP = 3
+
+# Value by constant
+mouse_btn_left = STATUS_NOT_PRESSED
 
 while True:
+    # Prerender
     mouse_pos = mouse.get_pos()
+    win_size = display.get_window_size()
+
+    if mouse_btn_left == STATUS_DOWN:
+        mouse_btn_left = STATUS_HOLD
+    elif mouse_btn_left == STATUS_UP:
+        mouse_btn_left = STATUS_NOT_PRESSED
 
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
             exit()
 
-        if e.type == pygame.MOUSEBUTTONDOWN and e.button == pygame.BUTTON_MIDDLE:
-            is_pressed = True
-        elif e.type == pygame.MOUSEBUTTONUP and e.button == pygame.BUTTON_MIDDLE:
-            is_pressed = False
+        if e.type == pygame.MOUSEBUTTONDOWN and e.button == pygame.BUTTON_LEFT:
+            mouse_btn_left = STATUS_DOWN
+        elif e.type == pygame.MOUSEBUTTONUP and e.button == pygame.BUTTON_LEFT:
+            mouse_btn_left = STATUS_UP
 
-            if True in is_num_pressed:
-                print(mouse_pos)
-        elif e.type == pygame.KEYDOWN:
-            is_num_pressed = [e.key == key for key in (pygame.K_1, pygame.K_2, pygame.K_3)]
-        elif e.type == pygame.KEYUP:
-            # if e.key == pygame.K_F1:
-            #     kx, ky = float(input('kx = ')), float(input('ky = '))
-            if True in [e.key == key for key in (pygame.K_1, pygame.K_2, pygame.K_3)]:
-                is_num_pressed = [False, False, False]
+    # Render
+    surface.fill(theme.BG_COLOR)
 
-    if is_pressed:
-        if True not in is_num_pressed:
-            coefficients[0] = coefficients[2] = mouse_pos[0] / stop, sqrt(mouse_pos[1]) / stop
-            coefficients[1] = sqrt(mouse_pos[0]) / stop, mouse_pos[1] / stop
+    for y in range(1, win_size[0] // SCALE_INTERVAL):
+        draw.line(surface, theme.BG_ACCENT_COLOR, (y * SCALE_INTERVAL, 0), (y * SCALE_INTERVAL, win_size[1]))
+
+    for y in range(1, win_size[1] // SCALE_INTERVAL):
+        draw.line(surface, theme.BG_ACCENT_COLOR, (0, y * SCALE_INTERVAL), (win_size[0], y * SCALE_INTERVAL))
+
+    if not vertexes:
+        if mouse_btn_left == STATUS_DOWN:
+            start_pos = mouse_pos
+        elif mouse_btn_left == STATUS_HOLD:
+            end_pos = mouse_pos
+
+        if mouse_btn_left == STATUS_HOLD:
+            draw.line(surface, theme.ACCENT_COLOR, start_pos, end_pos)
+
+        if mouse_btn_left == STATUS_UP:
+            if dist(start_pos, end_pos) != 0:
+                vertexes += fix_end_vertexes(start_pos, end_pos, RADIUS * 2)
+
+            start_pos = end_pos = None
+    elif mouse_btn_left == STATUS_DOWN:
+        if interact_vertex_index is None:
+            index = 0
+
+            for vertex in vertexes:
+                if dist(vertex, mouse_pos) < RADIUS:
+                    interact_vertex_index = index
+                    break
+
+                index += 1
+    elif mouse_btn_left == STATUS_HOLD and interact_vertex_index is not None:
+        vertexes[interact_vertex_index] = mouse_pos
+    elif mouse_btn_left == STATUS_UP:
+        if interact_vertex_index is None:
+            nearest_index = -1  # in that case -1 means 1 from the end, not invalid index
+            index = 0
+
+            for vertex in vertexes:
+                calculated_dist = dist(vertex, mouse_pos)
+
+                if dist(vertex, mouse_pos) < RADIUS:
+                    break
+
+                if index != 0 and index != len(vertexes) - 1 and calculated_dist < dist(vertexes[nearest_index], mouse_pos):
+                    nearest_index = index
+
+                index += 1
+            else:
+                vertexes.insert(nearest_index, mouse_pos)
         else:
-            index = is_num_pressed.index(True)
+            vertexes[0], vertexes[-1] = fix_end_vertexes(vertexes[0], vertexes[-1], RADIUS * 2)
 
-            coefficients[index] = (
-                mouse_pos[0] / stop, sqrt(mouse_pos[1]) / stop
-            ) if index in (0, 2) else (
-                sqrt(mouse_pos[0]) / stop, mouse_pos[1] / stop
-            )
+        interact_vertex_index = None
 
-    point_groups = [[], [], []]
-    super_points = []
+    curve_points = vertexes if len(vertexes) <= 2 else generate_curve(vertexes, 300)
 
-    for k in range(start, stop + 1):
-        kx, ky = coefficients[0]
-        point_groups[0].append((k * kx, (k * ky) ** 2))
-        if k < stop / 1.2555 and k % 2 == 0:
-            super_points.append((k * kx / 2, (k * ky) ** 2))
+    if curve_points:
+        if len(vertexes) > 2:
+            if len(vertexes) == 4:
+                draw.lines(surface, theme.NOT_ACCENT_COLOR, False, vertexes[:2], WIDTH)
+                draw.lines(surface, theme.NOT_ACCENT_COLOR, False, vertexes[2:], WIDTH)
+            else:
+                draw.lines(surface, theme.NOT_ACCENT_COLOR, False, vertexes, WIDTH)
 
-    right_bottom = point_groups[0][-1]
+            index = 1
+            for vertex in vertexes[index:-1]:
+                draw.circle(
+                    surface,
+                    theme.INTERACTION_COLOR if index == interact_vertex_index else theme.NOT_ACCENT_COLOR,
+                    vertex,
+                    RADIUS,
+                    WIDTH
+                )
+                index += 1
 
-    if coefficients[1][0] is None:
-        coefficients[1] = sqrt(right_bottom[0]) / stop, right_bottom[1] / stop
+        draw.lines(surface, theme.ACCENT_COLOR, False, (vertexes[0], *curve_points, vertexes[-1]), WIDTH)
 
-    for k in range(start, stop + 1):
-        point_groups[1].append(((k * coefficients[1][0]) ** 2, k * coefficients[1][1]))
-
-    points = []
-
-    for k in range(start, stop + 1):
-        points.append((k * coefficients[2][0], (k * coefficients[2][1]) ** 2))
-
-    for point in points[::-1]:
-        point_groups[2].append((points[-1][-2] - point[0], points[-1][-1] - point[1]))
-
-    surface.fill(0xffffff)
-
-    # pygame.draw.line(surface, 0x4caf50, (0, right_bottom[-1]), right_bottom, 3)
-    # pygame.draw.line(surface, 0x4caf50, (right_bottom[-2], 0), right_bottom, 3)
-    # pygame.draw.line(surface, 0x4caf50, (0, 0), right_bottom, 3)
-    #
-    # text_lines = 0
-    # for i in range(len(colors)):
-    #     pygame.draw.lines(surface, colors[i], False, point_groups[i], 3)
-    #
-    #     surface.blit(basefont.render(f'pos({i}): {point_groups[i][-1]}', True, 0x000000), (right_bottom[-2], right_bottom[-1] + basefont.get_height() * text_lines))
-    #     text_lines += 1
-    #
-    #     surface.blit(basefont.render(f'coef({i}): {coefficients[i]}', True, 0x000000), (right_bottom[-2], right_bottom[-1] + basefont.get_height() * text_lines))
-    #     text_lines += 1
-
-    # pygame.draw.lines(surface, 0x795548, False, super_points, 3)
-
-    pygame.draw.lines(surface, 0x4caf50, False, generator.generate_curve(vertexes, 300), 5)
-
-    for vertex in vertexes:
-        pygame.draw.circle(surface, 0xffc107, vertex, 10)
+        draw.circle(
+            surface,
+            theme.INTERACTION_COLOR if interact_vertex_index == 0
+            else theme.ACCENT_COLOR,
+            vertexes[0],
+            RADIUS,
+            WIDTH
+        )
+        draw.circle(
+            surface,
+            theme.INTERACTION_COLOR if interact_vertex_index == len(vertexes) - 1
+            else theme.ACCENT_COLOR,
+            vertexes[-1],
+            RADIUS,
+            WIDTH
+        )
 
     display.flip()
     clock.tick(60)
