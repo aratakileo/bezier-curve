@@ -39,13 +39,14 @@ while True:
             exit()
 
         mouse.event(e)
+        curve.event(e, SCALE_INTERVAL)
 
     curve.prerender(RADIUS * 2)
 
     # Render
     surface.fill(theme.BG_COLOR)
 
-    render.grid(surface, theme.BG_ACCENT_COLOR, ANCHOR, display.get_window_size(), 100, RADIUS)
+    render.grid(surface, theme.BG_ACCENT_COLOR, ANCHOR, display.get_window_size(), SCALE_INTERVAL, RADIUS)
     curve.render(surface, WIDTH, RADIUS)
 
     display.flip()
