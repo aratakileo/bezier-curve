@@ -19,7 +19,7 @@ class Curve:
 
         self.vertexes = []
 
-    def event(self, e: Event, scale_interval: float | int, step: float | int = 10):
+    def event(self, e: Event, scale_interval: float | int, min_dist: float | int, step: float | int = 10):
         if e.type == KEYDOWN and e.key in (K_LCTRL, K_RCTRL):
             self._ctrl_hold = True
             return
@@ -59,19 +59,15 @@ class Curve:
 
                 if e.key == K_LEFT:
                     self.vertexes[self._interact_vertex_index] = (_x - _step, _y)
-                    return
-
-                if e.key == K_RIGHT:
+                elif e.key == K_RIGHT:
                     self.vertexes[self._interact_vertex_index] = (_x + _step, _y)
-                    return
-
-                if e.key == K_UP:
+                elif e.key == K_UP:
                     self.vertexes[self._interact_vertex_index] = (_x, _y - _step)
-                    return
-
-                if e.key == K_DOWN:
+                elif e.key == K_DOWN:
                     self.vertexes[self._interact_vertex_index] = (_x, _y + _step)
-                    return
+
+                self.vertexes[0], self.vertexes[-1] = fix_end_vertexes(self.vertexes[0], self.vertexes[-1], min_dist)
+                return
 
             if e.key == K_ESCAPE:
                 self._interact_vertex_index = None

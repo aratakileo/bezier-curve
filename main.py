@@ -39,7 +39,7 @@ while True:
             exit()
 
         mouse.event(e)
-        curve.event(e, SCALE_INTERVAL)
+        curve.event(e, SCALE_INTERVAL, RADIUS * 2)
 
     curve.prerender(RADIUS * 2)
 
