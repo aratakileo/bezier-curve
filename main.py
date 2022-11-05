@@ -2,11 +2,12 @@ from pygame import display, font, mouse
 from math import sqrt
 import pygame
 
+import generator
 
 pygame.init()
 font.init()
 
-display.set_caption("Graphic value")
+display.set_caption("ibCurves")
 display.set_mode((800, 800), pygame.RESIZABLE)
 
 surface = display.get_surface()
@@ -19,6 +20,8 @@ start, stop = 0, 113
 colors = (0xf44336, 0x3f51b5, 0xffc107)
 is_num_pressed = [False, False, False]
 coefficients = [(2.1, 0.15), (None, None), (2.1, 0.15)]
+
+vertexes = [(0, 0), (0, 200), (350, 900), (600, 100), (600, 700)]
 
 while True:
     mouse_pos = mouse.get_pos()
@@ -82,21 +85,26 @@ while True:
 
     surface.fill(0xffffff)
 
-    pygame.draw.line(surface, 0x4caf50, (0, right_bottom[-1]), right_bottom, 3)
-    pygame.draw.line(surface, 0x4caf50, (right_bottom[-2], 0), right_bottom, 3)
-    pygame.draw.line(surface, 0x4caf50, (0, 0), right_bottom, 3)
+    # pygame.draw.line(surface, 0x4caf50, (0, right_bottom[-1]), right_bottom, 3)
+    # pygame.draw.line(surface, 0x4caf50, (right_bottom[-2], 0), right_bottom, 3)
+    # pygame.draw.line(surface, 0x4caf50, (0, 0), right_bottom, 3)
+    #
+    # text_lines = 0
+    # for i in range(len(colors)):
+    #     pygame.draw.lines(surface, colors[i], False, point_groups[i], 3)
+    #
+    #     surface.blit(basefont.render(f'pos({i}): {point_groups[i][-1]}', True, 0x000000), (right_bottom[-2], right_bottom[-1] + basefont.get_height() * text_lines))
+    #     text_lines += 1
+    #
+    #     surface.blit(basefont.render(f'coef({i}): {coefficients[i]}', True, 0x000000), (right_bottom[-2], right_bottom[-1] + basefont.get_height() * text_lines))
+    #     text_lines += 1
 
-    text_lines = 0
-    for i in range(len(colors)):
-        pygame.draw.lines(surface, colors[i], False, point_groups[i], 3)
+    # pygame.draw.lines(surface, 0x795548, False, super_points, 3)
 
-        surface.blit(basefont.render(f'pos({i}): {point_groups[i][-1]}', True, 0x000000), (right_bottom[-2], right_bottom[-1] + basefont.get_height() * text_lines))
-        text_lines += 1
+    pygame.draw.lines(surface, 0x4caf50, False, generator.generate_curve(vertexes, 300), 5)
 
-        surface.blit(basefont.render(f'coef({i}): {coefficients[i]}', True, 0x000000), (right_bottom[-2], right_bottom[-1] + basefont.get_height() * text_lines))
-        text_lines += 1
-
-    pygame.draw.lines(surface, 0x795548, False, super_points, 3)
+    for vertex in vertexes:
+        pygame.draw.circle(surface, 0xffc107, vertex, 10)
 
     display.flip()
     clock.tick(60)
