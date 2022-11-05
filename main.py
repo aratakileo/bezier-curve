@@ -1,6 +1,8 @@
 from pygame import display, font, mouse, draw
 from curve import generate_curve
+from render.text import bufferize_font
 from typing import Sequence
+from render import render
 from math import dist
 import pygame
 import theme
@@ -21,21 +23,11 @@ def fix_end_vertexes(start_vertex: Sequence, end_vertex: Sequence, min_dist: flo
     return start_vertex, end_vertex
 
 
-pygame.init()
-font.init()
-
-display.set_caption("ibCurves")
-display.set_mode((800, 800), pygame.RESIZABLE)
-
-surface = display.get_surface()
-clock = pygame.time.Clock()
-basefont = font.Font(None, 20)
-
-# Other values
 start_pos = end_pos = interact_vertex_index = None
 vertexes = []
 
 # Constants
+ANCHOR = (800, 800)
 SCALE_INTERVAL = 100
 RADIUS = 7
 WIDTH = 1
@@ -47,6 +39,19 @@ STATUS_UP = 3
 
 # Value by constant
 mouse_btn_left = STATUS_NOT_PRESSED
+
+# Pygame stuff
+
+pygame.init()
+font.init()
+
+display.set_caption("Bezier curve")
+display.set_mode(ANCHOR, pygame.RESIZABLE)
+
+surface = display.get_surface()
+clock = pygame.time.Clock()
+
+bufferize_font(22)
 
 while True:
     # Prerender
@@ -70,11 +75,7 @@ while True:
     # Render
     surface.fill(theme.BG_COLOR)
 
-    for y in range(1, win_size[0] // SCALE_INTERVAL):
-        draw.line(surface, theme.BG_ACCENT_COLOR, (y * SCALE_INTERVAL, 0), (y * SCALE_INTERVAL, win_size[1]))
-
-    for y in range(1, win_size[1] // SCALE_INTERVAL):
-        draw.line(surface, theme.BG_ACCENT_COLOR, (0, y * SCALE_INTERVAL), (win_size[0], y * SCALE_INTERVAL))
+    render.grid(surface, theme.BG_ACCENT_COLOR, ANCHOR, win_size, SCALE_INTERVAL, RADIUS)
 
     if not vertexes:
         if mouse_btn_left == STATUS_DOWN:
@@ -129,8 +130,8 @@ while True:
     if curve_points:
         if len(vertexes) > 2:
             if len(vertexes) == 4:
-                draw.lines(surface, theme.NOT_ACCENT_COLOR, False, vertexes[:2], WIDTH)
-                draw.lines(surface, theme.NOT_ACCENT_COLOR, False, vertexes[2:], WIDTH)
+                draw.line(surface, theme.NOT_ACCENT_COLOR, *vertexes[:2], WIDTH)
+                draw.line(surface, theme.NOT_ACCENT_COLOR, *vertexes[2:], WIDTH)
             else:
                 draw.lines(surface, theme.NOT_ACCENT_COLOR, False, vertexes, WIDTH)
 
