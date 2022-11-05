@@ -14,7 +14,7 @@ def grid(
         scale_interval: float | int,
         text_margin: float | int
 ):
-    for _x in range(1, ceil(size[0] / scale_interval)):
+    for _x in range(1, ceil(size[0] / scale_interval) + 1):
         x = _x * scale_interval
         y = size[1]
         draw_line(surface, color, (x, 0), (x, y))
@@ -29,7 +29,7 @@ def grid(
             (x - font_size[0] - text_margin, y - font_size[1])
         )
 
-    for _y in range(1, ceil(size[1] / scale_interval)):
+    for _y in range(1, ceil(size[1] / scale_interval) + 1):
         y = _y * scale_interval
         draw_line(surface, color, (0, y), (size[0], y))
 

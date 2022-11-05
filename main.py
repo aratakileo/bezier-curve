@@ -45,7 +45,7 @@ while True:
     # Render
     surface.fill(theme.BG_COLOR)
 
-    render.grid(surface, theme.BG_ACCENT_COLOR, ANCHOR, display.get_window_size(), SCALE_INTERVAL, RADIUS)
+    render.grid(surface, theme.BG_ACCENT_COLOR, ANCHOR, display.get_window_size(), 100, RADIUS)
     curve.render(surface, WIDTH, RADIUS)
 
     display.flip()
