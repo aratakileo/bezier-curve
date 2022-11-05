@@ -8,7 +8,7 @@ colorValue = pygame_color.Color | int | str | Sequence
 def has_alpha(color: int):
     """
 
-    :param color: alpha format `#ff000000`
+    :param color: alpha format `#ff000000` or `#000000`
     :return:
     """
     return color > 0xffffff
@@ -17,7 +17,7 @@ def has_alpha(color: int):
 def optimize_alpha_color(color: colorValue):
     """
 
-    :param color: alpha format `#ff000000`
+    :param color: alpha format `#ff000000` or `#000000`
     :return:
     """
     if isinstance(color, int):

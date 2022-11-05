@@ -35,6 +35,9 @@ def render_base_text(
 
 
 def bufferize_font(size: int):
+    if not get_init():
+        init()
+
     global _buffered_font, _buffered_font_size
 
     if _buffered_font_size != size:
