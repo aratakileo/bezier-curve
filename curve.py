@@ -38,6 +38,10 @@ class Curve:
                 return
 
             if self._interact_vertex_index is not None:
+                if e.key == K_ESCAPE:
+                    self._interact_vertex_index = None
+                    return
+                
                 if e.key in (K_DELETE, K_BACKSPACE) and self.vertexes:
                     if self._interact_vertex_index == 0 or self._interact_vertex_index == len(self.vertexes) - 1:
                         self.vertexes = []
@@ -67,10 +71,7 @@ class Curve:
                     self.vertexes[self._interact_vertex_index] = (_x, _y + _step)
 
                 self.vertexes[0], self.vertexes[-1] = fix_end_vertexes(self.vertexes[0], self.vertexes[-1], min_dist)
-                return
-
-            if e.key == K_ESCAPE:
-                self._interact_vertex_index = None
+                self._need_regenerate_curve = True
                 return
 
     def prerender(self, min_dist: float | int):
