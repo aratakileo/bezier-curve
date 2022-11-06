@@ -1,6 +1,6 @@
-from render.text import bufferize_font
+from text import bufferize_font
 from pygame import display
-from render import render
+from grid import Grid
 from mouse import Mouse
 from curve import Curve
 import pygame
@@ -12,26 +12,24 @@ vertexes = []
 
 # Constants
 ANCHOR = (800, 800)
-SCALE_INTERVAL = 100
 RADIUS = 7
 WIDTH = 1
 
 # Pygame stuff
-pygame.init()
-
 display.set_caption("Bezier curve")
 display.set_mode(ANCHOR, pygame.RESIZABLE)
 
 surface = display.get_surface()
 clock = pygame.time.Clock()
 
-bufferize_font(22)
+bufferize_font(20)
 
 mouse = Mouse()
-curve = Curve(mouse)
+grid = Grid(100, ANCHOR)
+curve = Curve(grid, mouse, RADIUS)
 
 while True:
-    # Prerender
+    # Prerender & event
     mouse.prerender()
 
     for e in pygame.event.get():
@@ -39,15 +37,15 @@ while True:
             exit()
 
         mouse.event(e)
-        curve.event(e, SCALE_INTERVAL, RADIUS * 2)
+        curve.event(e)
 
-    curve.prerender(RADIUS * 2)
+    curve.prerender()
 
     # Render
     surface.fill(theme.BG_COLOR)
 
-    render.grid(surface, theme.BG_ACCENT_COLOR, ANCHOR, display.get_window_size(), SCALE_INTERVAL, RADIUS)
-    curve.render(surface, WIDTH, RADIUS)
+    grid.render(surface, theme.BG_ACCENT_COLOR, display.get_window_size(), WIDTH, RADIUS)
+    curve.render(surface, WIDTH)
 
     display.flip()
     clock.tick(60)
