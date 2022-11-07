@@ -2,6 +2,6 @@
 
 Bezier curve editor/generator
 
-### Require
+### Requirements
 - `python >= 3.10`
 - `pygame >= 2.0`
