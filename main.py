@@ -1,4 +1,4 @@
-from text import bufferize_font
+from text import bufferize_font, render_base_text
 from pygame import display
 from grid import Grid
 from mouse import Mouse
@@ -46,6 +46,8 @@ while True:
 
     grid.render(surface, theme.BG_ACCENT_COLOR, display.get_window_size(), WIDTH, RADIUS)
     curve.render(surface, WIDTH)
+
+    render_base_text(surface, f'fps: {clock.get_fps():.3f}', theme.TEXT_COLOR, (0, 0))
 
     display.flip()
     clock.tick(60)

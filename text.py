@@ -31,7 +31,7 @@ def render_base_text(
 
         font = _buffered_font
 
-    surface.blit(font.render(text, antialias, optimize_alpha_color(alpha_color)), pos)
+    surface.blit(font.render(text.__str__(), antialias, optimize_alpha_color(alpha_color)), pos)
 
 
 def bufferize_font(size: int):
