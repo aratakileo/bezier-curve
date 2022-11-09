@@ -3,6 +3,7 @@ from pygame import (
 )
 from pygame.draw import line as draw_line, lines as draw_lines, circle as draw_circle, rect as draw_rect
 from pygex.text import render_text, get_buffered_font
+from pygex.math import get_curve_points
 from pygame.surface import SurfaceType
 from pygame.event import Event
 from pygex.mouse import Mouse
@@ -100,7 +101,7 @@ class Curve:
 
             if self._mouse.left_btn == Mouse.BUTTON_UP:
                 if dist(self._start_pos, self._end_pos) != 0:
-                    self.vertexes += fix_end_vertexes(self._start_pos, self._end_pos, self._vertex_radius * 2)
+                    self.vertexes += fix_vertexes_ends(self._start_pos, self._end_pos, self._vertex_radius * 2)
                     self._interact_vertex_index = 1
                     self._need_regenerate_curve = True
 
@@ -148,7 +149,7 @@ class Curve:
 
         if self._vertex_moved:
             if self.is_tip(self._interact_vertex_index):
-                self.vertexes[0], self.vertexes[-1] = fix_end_vertexes(
+                self.vertexes[0], self.vertexes[-1] = fix_vertexes_ends(
                     self.vertexes[0],
                     self.vertexes[-1],
                     self._vertex_radius * 2
@@ -156,7 +157,8 @@ class Curve:
             self._vertex_moved = False
 
         if self._need_regenerate_curve:
-            self._curve_points = self.vertexes if len(self.vertexes) <= 2 else generate_curve(self.vertexes, 200)
+            self._curve_points = self.vertexes if len(self.vertexes) <= 2 \
+                else get_curve_points(self.vertexes, 200, True)
             self._need_regenerate_curve = False
 
     def render(self, surface: SurfaceType, line_width: int):
@@ -186,7 +188,7 @@ class Curve:
                 surface,
                 theme.ACCENT_COLOR,
                 False,
-                (self.vertexes[0], *self._curve_points, self.vertexes[-1]),
+                self._curve_points,
                 line_width
             )
 
@@ -228,30 +230,7 @@ class Curve:
                 surface.blit(render_text(text, 0xffffff), (render_pos[0] - padding, render_pos[1] - padding))
 
 
-def interpolate(p1: Sequence, p2: Sequence, t: float):
-    return tuple((1 - t) * p1[i] + t * p2[i] for i in range(2))
-
-
-def get_curve_point(vertexes: Sequence, r: int, i: int, t: float):
-    if r == 0:
-        return vertexes[i]
-
-    return interpolate(get_curve_point(vertexes, r - 1, i, t), get_curve_point(vertexes, r - 1, i + 1, t), t)
-
-
-def generate_curve(vertexes: Sequence, density=100):
-    points = []
-
-    if len(vertexes) <= 1:
-        return points
-
-    for i in range(density):
-        points.append(get_curve_point(vertexes, len(vertexes) - 1, 0, i / density))
-
-    return points
-
-
-def fix_end_vertexes(start_vertex: Sequence, end_vertex: Sequence, min_dist: float | int):
+def fix_vertexes_ends(start_vertex: Sequence, end_vertex: Sequence, min_dist: float | int):
     if dist(start_vertex, end_vertex) < min_dist:
         new_start_vertex, new_end_vertex = [*start_vertex], [*end_vertex]
 
@@ -266,4 +245,4 @@ def fix_end_vertexes(start_vertex: Sequence, end_vertex: Sequence, min_dist: flo
     return start_vertex, end_vertex
 
 
-__all__ = 'Curve', 'interpolate', 'get_curve_point', 'generate_curve', 'fix_end_vertexes'
+__all__ = 'Curve',
