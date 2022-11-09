@@ -1,8 +1,8 @@
-from text import bufferize_font, render_base_text
+from pygex.text import bufferize_font, render_text
+from pygex.mouse import Mouse
 from pygame import display
-from grid import Grid
-from mouse import Mouse
 from curve import Curve
+from grid import Grid
 import pygame
 import theme
 
@@ -36,8 +36,8 @@ while True:
         if e.type == pygame.QUIT:
             exit()
 
-        mouse.event(e)
-        curve.event(e)
+        mouse.process_event(e)
+        curve.process_event(e)
 
     curve.prerender()
 
@@ -47,7 +47,7 @@ while True:
     grid.render(surface, theme.BG_ACCENT_COLOR, display.get_window_size(), WIDTH, RADIUS)
     curve.render(surface, WIDTH)
 
-    render_base_text(surface, f'fps: {clock.get_fps():.3f}', theme.TEXT_COLOR, (0, 0))
+    surface.blit(render_text(f'fps: {clock.get_fps():.3f}', theme.TEXT_COLOR), (0, 0))
 
     display.flip()
     clock.tick(60)

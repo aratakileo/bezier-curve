@@ -2,11 +2,11 @@ from pygame import (
     KEYDOWN, KEYUP, K_TAB, K_ESCAPE, K_DELETE, K_BACKSPACE, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_LCTRL, K_RCTRL
 )
 from pygame.draw import line as draw_line, lines as draw_lines, circle as draw_circle, rect as draw_rect
-from text import render_base_text, get_buffered_font
+from pygex.text import render_text, get_buffered_font
 from pygame.surface import SurfaceType
 from pygame.event import Event
+from pygex.mouse import Mouse
 from typing import Sequence
-from mouse import Mouse
 from math import dist
 from grid import Grid
 import theme
@@ -29,7 +29,7 @@ class Curve:
     def is_tip(self, index: int):
         return self.vertexes and (index == 0 or index == len(self.vertexes) - 1)
 
-    def event(self, e: Event, step: float | int = 10):
+    def process_event(self, e: Event, step: float | int = 10):
         if e.type == KEYDOWN and e.key in (K_LCTRL, K_RCTRL):
             self._ctrl_hold = True
             return
@@ -225,7 +225,7 @@ class Curve:
                     0,
                     5
                 )
-                render_base_text(surface, text, 0xffffff, (render_pos[0] - padding, render_pos[1] - padding))
+                surface.blit(render_text(text, 0xffffff), (render_pos[0] - padding, render_pos[1] - padding))
 
 
 def interpolate(p1: Sequence, p2: Sequence, t: float):

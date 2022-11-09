@@ -1,7 +1,7 @@
-from text import render_base_text, get_buffered_font
+from pygex.text import render_text, get_buffered_font
 from pygame.draw import line as draw_line
 from pygame.surface import SurfaceType
-from color import colorValue
+from pygex.color import colorValue
 from typing import Sequence
 from math import ceil
 
@@ -39,7 +39,7 @@ class Grid:
 
             draw_line(surface, color, (x, 0), (x, y), line_width)
 
-            render_base_text(surface, text, color, text_pos)
+            surface.blit(render_text(text, color), text_pos)
 
         # Draw horizontal lines
         for step in range(1, ceil(size[1] / self.scale_interval) + 1):
@@ -51,7 +51,7 @@ class Grid:
 
             draw_line(surface, color, (0, y), (size[0], y), line_width)
 
-            render_base_text(surface, text, color, text_pos)
+            surface.blit(render_text(text, color), text_pos)
 
 
 __all__ = 'Grid',
