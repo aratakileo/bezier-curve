@@ -229,7 +229,7 @@ class Curve:
 
 
 def interpolate(p1: Sequence, p2: Sequence, t: float):
-    return [(1 - t) * p1[i] + t * p2[i] for i in range(2)]
+    return tuple((1 - t) * p1[i] + t * p2[i] for i in range(2))
 
 
 def get_curve_point(vertexes: Sequence, r: int, i: int, t: float):
