@@ -29,9 +29,6 @@ grid = Grid(100, ANCHOR)
 curve = Curve(grid, mouse, RADIUS)
 
 while True:
-    # Prerender & event
-    mouse.prerender()
-
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
             exit()
@@ -50,4 +47,5 @@ while True:
     surface.blit(render_text(f'fps: {clock.get_fps():.3f}', theme.TEXT_COLOR), (0, 0))
 
     display.flip()
+    mouse.flip()
     clock.tick(60)

@@ -3,8 +3,8 @@ from pygame import (
 )
 from pygame.draw import line as draw_line, lines as draw_lines, circle as draw_circle, rect as draw_rect
 from pygex.text import render_text, get_buffered_font
-from pygex.math import get_curve_points
 from pygame.surface import SurfaceType
+from pygex.math import generate_curve
 from pygame.event import Event
 from pygex.mouse import Mouse
 from typing import Sequence
@@ -94,19 +94,19 @@ class Curve:
         mouse_pos = self._mouse.get_pos()
 
         if not self.vertexes:
-            if self._mouse.left_btn == Mouse.BUTTON_DOWN:
+            if self._mouse.left_is_down:
                 self._start_pos = mouse_pos
-            elif self._mouse.left_btn == Mouse.BUTTON_HOLD:
+            elif self._mouse.left_is_hold:
                 self._end_pos = mouse_pos
 
-            if self._mouse.left_btn == Mouse.BUTTON_UP:
+            if self._mouse.left_is_up:
                 if dist(self._start_pos, self._end_pos) != 0:
                     self.vertexes += fix_vertexes_ends(self._start_pos, self._end_pos, self._vertex_radius * 2)
                     self._interact_vertex_index = 1
                     self._need_regenerate_curve = True
 
                 self._start_pos = self._end_pos = None
-        elif self._mouse.left_btn == Mouse.BUTTON_DOWN:
+        elif self._mouse.left_is_down:
             i = 0
             for vertex in self.vertexes:
                 if dist(vertex, mouse_pos) < self._vertex_radius:
@@ -138,13 +138,13 @@ class Curve:
                 else:
                     self.vertexes.insert(nearest_index, mouse_pos)
                     self._need_regenerate_curve = True
-        elif self._mouse.left_btn == Mouse.BUTTON_HOLD and self._interact_vertex_index is not None \
+        elif self._mouse.left_is_hold and self._interact_vertex_index is not None \
                 and self._mouse.get_rel() != (0, 0):
             self.vertexes[self._interact_vertex_index] = mouse_pos
 
             if self.is_not_line():
                 self._need_regenerate_curve = True
-        elif self._mouse.left_btn == Mouse.BUTTON_UP and self._interact_vertex_index is not None:
+        elif self._mouse.left_is_up and self._interact_vertex_index is not None:
             self._vertex_moved = True
 
         if self._vertex_moved:
@@ -158,11 +158,11 @@ class Curve:
 
         if self._need_regenerate_curve:
             self._curve_points = self.vertexes if len(self.vertexes) <= 2 \
-                else get_curve_points(self.vertexes, 200, True)
+                else generate_curve(self.vertexes, 200, True)
             self._need_regenerate_curve = False
 
     def render(self, surface: SurfaceType, line_width: int):
-        if not self.vertexes and self._mouse.left_btn == Mouse.BUTTON_HOLD:
+        if not self.vertexes and self._mouse.left_is_hold:
             draw_line(surface, theme.ACCENT_COLOR, self._start_pos, self._end_pos, line_width)
 
         if self._curve_points:
