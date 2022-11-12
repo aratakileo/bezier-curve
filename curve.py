@@ -1,12 +1,10 @@
-from pygame import (
-    KEYDOWN, KEYUP, K_TAB, K_ESCAPE, K_DELETE, K_BACKSPACE, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_LCTRL, K_RCTRL
-)
 from pygame.draw import line as draw_line, lines as draw_lines, circle as draw_circle, rect as draw_rect
+from pygame import K_TAB, K_ESCAPE, K_DELETE, K_BACKSPACE, K_UP, K_DOWN, K_LEFT, K_RIGHT
 from pygex.text import render_text, get_buffered_font
+from pygex.input import get_input, Input
 from pygame.surface import SurfaceType
 from pygex.math import generate_curve
-from pygame.event import Event
-from pygex.mouse import Mouse
+from pygex.mouse import get_mouse
 from typing import Sequence
 from math import dist
 from grid import Grid
@@ -14,12 +12,11 @@ import theme
 
 
 class Curve:
-    def __init__(self, grid: Grid, mouse: Mouse, vertex_radius: float | int):
+    def __init__(self, grid: Grid, vertex_radius: float | int):
         self._start_pos = self._end_pos = self._interact_vertex_index = None
-        self._need_regenerate_curve = self._ctrl_hold = self._vertex_moved = False
+        self._need_regenerate_curve = self._vertex_moved = False
         self._curve_points = []
         self._grid = grid
-        self._mouse = mouse
         self._vertex_radius = vertex_radius
 
         self.vertexes = []
@@ -30,45 +27,33 @@ class Curve:
     def is_tip(self, index: int):
         return self.vertexes and (index == 0 or index == len(self.vertexes) - 1)
 
-    def process_event(self, e: Event, step: float | int = 10):
-        if e.type == KEYDOWN and e.key in (K_LCTRL, K_RCTRL):
-            self._ctrl_hold = True
-            return
+    def prerender(self):
+        mouse_pos = get_mouse().get_pos()
 
-        if e.type == KEYUP:
-            if e.key in (K_LCTRL, K_RCTRL):
-                self._ctrl_hold = False
-                return
-
-            if e.key == K_TAB and self.vertexes:
+        if self.vertexes:
+            if get_input().is_up(K_TAB):
                 if self._interact_vertex_index is None or self._interact_vertex_index == len(self.vertexes) - 1:
                     self._interact_vertex_index = 0
-                    return
+                else:
+                    self._interact_vertex_index += 1
+            elif self._interact_vertex_index is not None:
+                get_input().try_start_observing(Input.K_CTRL)
 
-                self._interact_vertex_index += 1
-                return
-
-            if self._interact_vertex_index is not None:
-                if e.key == K_ESCAPE:
+                if get_input().is_up(K_ESCAPE):
                     self._interact_vertex_index = None
-                    return
-
-                if e.key in (K_DELETE, K_BACKSPACE) and self.vertexes:
+                elif get_input().any_is_up(K_DELETE, K_BACKSPACE):
                     if self.is_tip(self._interact_vertex_index):
                         self.vertexes = []
                         self._curve_points = []
                         self._interact_vertex_index = None
-                        return
-
-                    del self.vertexes[self._interact_vertex_index]
-                    self._need_regenerate_curve = True
-                    return
-
-                if e.key in (K_LEFT, K_RIGHT, K_UP, K_DOWN):
+                    else:
+                        del self.vertexes[self._interact_vertex_index]
+                        self._need_regenerate_curve = True
+                elif get_input().any_is_up(K_LEFT, K_RIGHT, K_UP, K_DOWN):
                     _x, _y = self.vertexes[self._interact_vertex_index]
-                    _step = step
+                    _step = 10
 
-                    if self._ctrl_hold:
+                    if get_input().is_hold(Input.K_CTRL):
                         scale_interval = self._grid.scale_interval
 
                         _x = (_x // scale_interval) * scale_interval
@@ -76,13 +61,13 @@ class Curve:
 
                         _step = scale_interval
 
-                    if e.key == K_LEFT:
+                    if get_input().is_up(K_LEFT):
                         self.vertexes[self._interact_vertex_index] = (_x - _step, _y)
-                    elif e.key == K_RIGHT:
+                    elif get_input().is_up(K_RIGHT):
                         self.vertexes[self._interact_vertex_index] = (_x + _step, _y)
-                    elif e.key == K_UP:
+                    elif get_input().is_up(K_UP):
                         self.vertexes[self._interact_vertex_index] = (_x, _y - _step)
-                    elif e.key == K_DOWN:
+                    elif get_input().is_up(K_DOWN):
                         self.vertexes[self._interact_vertex_index] = (_x, _y + _step)
 
                     self._vertex_moved = True
@@ -90,23 +75,20 @@ class Curve:
                     if self.is_not_line():
                         self._need_regenerate_curve = True
 
-    def prerender(self):
-        mouse_pos = self._mouse.get_pos()
-
         if not self.vertexes:
-            if self._mouse.left_is_down:
+            if get_mouse().left_is_down:
                 self._start_pos = mouse_pos
-            elif self._mouse.left_is_hold:
+            elif get_mouse().left_is_hold:
                 self._end_pos = mouse_pos
 
-            if self._mouse.left_is_up:
+            if get_mouse().left_is_up:
                 if dist(self._start_pos, self._end_pos) != 0:
                     self.vertexes += fix_vertexes_ends(self._start_pos, self._end_pos, self._vertex_radius * 2)
                     self._interact_vertex_index = 1
                     self._need_regenerate_curve = True
 
                 self._start_pos = self._end_pos = None
-        elif self._mouse.left_is_down:
+        elif get_mouse().left_is_down:
             i = 0
             for vertex in self.vertexes:
                 if dist(vertex, mouse_pos) < self._vertex_radius:
@@ -138,13 +120,13 @@ class Curve:
                 else:
                     self.vertexes.insert(nearest_index, mouse_pos)
                     self._need_regenerate_curve = True
-        elif self._mouse.left_is_hold and self._interact_vertex_index is not None \
-                and self._mouse.get_rel() != (0, 0):
+        elif get_mouse().left_is_hold and self._interact_vertex_index is not None \
+                and get_mouse().get_rel() != (0, 0):
             self.vertexes[self._interact_vertex_index] = mouse_pos
 
             if self.is_not_line():
                 self._need_regenerate_curve = True
-        elif self._mouse.left_is_up and self._interact_vertex_index is not None:
+        elif get_mouse().left_is_up and self._interact_vertex_index is not None:
             self._vertex_moved = True
 
         if self._vertex_moved:
@@ -162,7 +144,7 @@ class Curve:
             self._need_regenerate_curve = False
 
     def render(self, surface: SurfaceType, line_width: int):
-        if not self.vertexes and self._mouse.left_is_hold:
+        if not self.vertexes and get_mouse().left_is_hold:
             draw_line(surface, theme.ACCENT_COLOR, self._start_pos, self._end_pos, line_width)
 
         if self._curve_points:

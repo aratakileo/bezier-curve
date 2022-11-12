@@ -1,5 +1,6 @@
 from pygex.text import bufferize_font, render_text
 from pygex.mouse import Mouse
+from pygex.input import Input
 from pygame import display
 from curve import Curve
 from grid import Grid
@@ -25,16 +26,18 @@ clock = pygame.time.Clock()
 bufferize_font(20)
 
 mouse = Mouse()
+input = Input()
+
 grid = Grid(100, ANCHOR)
-curve = Curve(grid, mouse, RADIUS)
+curve = Curve(grid, RADIUS)
 
 while True:
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
             exit()
 
+        input.process_event(e)
         mouse.process_event(e)
-        curve.process_event(e)
 
     curve.prerender()
 
@@ -47,5 +50,6 @@ while True:
     surface.blit(render_text(f'fps: {clock.get_fps():.3f}', theme.TEXT_COLOR), (0, 0))
 
     display.flip()
+    input.flip()
     mouse.flip()
     clock.tick(60)
