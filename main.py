@@ -23,13 +23,15 @@ display.set_mode(ANCHOR, pygame.RESIZABLE)
 surface = display.get_surface()
 clock = pygame.time.Clock()
 
+# Pygex stuff
 bufferize_font(20)
 
 mouse = Mouse()
 input = Input()
 
-grid = Grid(100, ANCHOR)
-curve = Curve(grid, RADIUS)
+# Core stuff
+curve = Curve(RADIUS)
+grid = Grid(curve, 100, ANCHOR)
 
 while True:
     for e in pygame.event.get():
@@ -39,6 +41,7 @@ while True:
         input.process_event(e)
         mouse.process_event(e)
 
+    grid.prerender()
     curve.prerender()
 
     # Render

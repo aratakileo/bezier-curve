@@ -6,17 +6,16 @@ from pygame.surface import SurfaceType
 from pygex.math import generate_curve
 from pygex.mouse import get_mouse
 from typing import Sequence
+from grid import get_grid
 from math import dist
-from grid import Grid
 import theme
 
 
 class Curve:
-    def __init__(self, grid: Grid, vertex_radius: float | int):
+    def __init__(self, vertex_radius: float | int):
         self._start_pos = self._end_pos = self._interact_vertex_index = None
         self._need_regenerate_curve = self._vertex_moved = self._new_vertex_quick_move = False
         self._curve_points = []
-        self._grid = grid
         self._vertex_radius = vertex_radius
 
         self.vertexes = []
@@ -28,7 +27,7 @@ class Curve:
         return self.vertexes and (index == 0 or index == len(self.vertexes) - 1)
 
     def prerender(self):
-        mouse_pos = get_mouse().get_pos()
+        mouse_pos = get_grid().to_grid_pos(get_mouse().get_pos())
 
         if self.vertexes:
             if get_input().is_applying(K_TAB):
@@ -54,7 +53,7 @@ class Curve:
                     _step = 10
 
                     if get_input().is_hold(Input.GK_CTRL):
-                        scale_interval = self._grid.scale_interval
+                        scale_interval = get_grid().scale_interval
 
                         _x = (_x // scale_interval) * scale_interval
                         _y = (_y // scale_interval) * scale_interval
@@ -121,8 +120,7 @@ class Curve:
                     self.vertexes.insert(nearest_index, mouse_pos)
                     self._need_regenerate_curve = self._new_vertex_quick_move = True
                     self._interact_vertex_index = nearest_index
-        elif get_mouse().left_is_hold and self._interact_vertex_index is not None \
-                and get_mouse().get_rel() != (0, 0):
+        elif get_mouse().left_is_hold and self._interact_vertex_index is not None and get_mouse().is_moved:
             self.vertexes[self._interact_vertex_index] = mouse_pos
 
             if self.is_not_line():
@@ -149,18 +147,26 @@ class Curve:
 
     def render(self, surface: SurfaceType, line_width: int):
         if not self.vertexes and get_mouse().left_is_hold:
-            draw_line(surface, theme.ACCENT_COLOR, self._start_pos, self._end_pos, line_width)
+            draw_line(
+                surface,
+                theme.ACCENT_COLOR,
+                get_grid().from_grid_pos(self._start_pos),
+                get_grid().from_grid_pos(self._end_pos),
+                line_width
+            )
+
+        render_vertexes = get_grid().from_grid_points(self.vertexes)
 
         if self._curve_points:
             if self.is_not_line():
                 if len(self.vertexes) == 4:
-                    draw_line(surface, theme.NOT_ACCENT_COLOR, *self.vertexes[:2], line_width)
-                    draw_line(surface, theme.NOT_ACCENT_COLOR, *self.vertexes[2:], line_width)
+                    draw_line(surface, theme.NOT_ACCENT_COLOR, *render_vertexes[:2], line_width)
+                    draw_line(surface, theme.NOT_ACCENT_COLOR, *render_vertexes[2:], line_width)
                 else:
-                    draw_lines(surface, theme.NOT_ACCENT_COLOR, False, self.vertexes, line_width)
+                    draw_lines(surface, theme.NOT_ACCENT_COLOR, False, render_vertexes, line_width)
 
                 index = 1
-                for vertex in self.vertexes[index:-1]:
+                for vertex in render_vertexes[index:-1]:
                     draw_circle(
                         surface,
                         theme.INTERACTION_COLOR if index == self._interact_vertex_index else theme.NOT_ACCENT_COLOR,
@@ -174,7 +180,7 @@ class Curve:
                 surface,
                 theme.ACCENT_COLOR,
                 False,
-                self._curve_points,
+                get_grid().from_grid_points(self._curve_points),
                 line_width
             )
 
@@ -182,7 +188,7 @@ class Curve:
                 surface,
                 theme.INTERACTION_COLOR if self._interact_vertex_index == 0
                 else theme.ACCENT_COLOR,
-                self.vertexes[0],
+                render_vertexes[0],
                 self._vertex_radius,
                 line_width
             )
@@ -190,15 +196,15 @@ class Curve:
                 surface,
                 theme.INTERACTION_COLOR if self._interact_vertex_index == len(self.vertexes) - 1
                 else theme.ACCENT_COLOR,
-                self.vertexes[-1],
+                render_vertexes[-1],
                 self._vertex_radius,
                 line_width
             )
 
             if self.is_tip(self._interact_vertex_index):
                 padding = 3
-                x, y = self.vertexes[self._interact_vertex_index]
-                text = f'{self._grid.to_grid_x(x):.3f}, {self._grid.to_grid_y(y):.3f}'
+                x, y = render_vertexes[self._interact_vertex_index]
+                text = f'{get_grid().to_intervalized_x(x):.3f}, {get_grid().to_intervalized_y(y):.3f}'
                 textw, texth = get_buffered_font().size(text)
                 render_pos = x - textw / 2, y - texth - self._vertex_radius
 
