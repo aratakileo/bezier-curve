@@ -14,7 +14,7 @@ import theme
 class Curve:
     def __init__(self, grid: Grid, vertex_radius: float | int):
         self._start_pos = self._end_pos = self._interact_vertex_index = None
-        self._need_regenerate_curve = self._vertex_moved = False
+        self._need_regenerate_curve = self._vertex_moved = self._new_vertex_quick_move = False
         self._curve_points = []
         self._grid = grid
         self._vertex_radius = vertex_radius
@@ -101,7 +101,7 @@ class Curve:
                     self._interact_vertex_index = None
                     return
 
-                nearest_index = -1  # in that case -1 means 1 from the end, not invalid index
+                nearest_index = 1
                 i = 0
 
                 for vertex in self.vertexes:
@@ -119,7 +119,8 @@ class Curve:
                     i += 1
                 else:
                     self.vertexes.insert(nearest_index, mouse_pos)
-                    self._need_regenerate_curve = True
+                    self._need_regenerate_curve = self._new_vertex_quick_move = True
+                    self._interact_vertex_index = nearest_index
         elif get_mouse().left_is_hold and self._interact_vertex_index is not None \
                 and get_mouse().get_rel() != (0, 0):
             self.vertexes[self._interact_vertex_index] = mouse_pos
@@ -128,6 +129,9 @@ class Curve:
                 self._need_regenerate_curve = True
         elif get_mouse().left_is_up and self._interact_vertex_index is not None:
             self._vertex_moved = True
+
+            if self._new_vertex_quick_move:
+                self._new_vertex_quick_move = False
 
         if self._vertex_moved:
             if self.is_tip(self._interact_vertex_index):
