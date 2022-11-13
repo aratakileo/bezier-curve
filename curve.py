@@ -31,13 +31,13 @@ class Curve:
         mouse_pos = get_mouse().get_pos()
 
         if self.vertexes:
-            if get_input().is_up(K_TAB):
+            if get_input().is_applying(K_TAB):
                 if self._interact_vertex_index is None or self._interact_vertex_index == len(self.vertexes) - 1:
                     self._interact_vertex_index = 0
                 else:
                     self._interact_vertex_index += 1
             elif self._interact_vertex_index is not None:
-                get_input().try_start_observing(Input.K_CTRL)
+                get_input().try_start_observing(Input.GK_CTRL)
 
                 if get_input().is_up(K_ESCAPE):
                     self._interact_vertex_index = None
@@ -49,11 +49,11 @@ class Curve:
                     else:
                         del self.vertexes[self._interact_vertex_index]
                         self._need_regenerate_curve = True
-                elif get_input().any_is_up(K_LEFT, K_RIGHT, K_UP, K_DOWN):
+                elif get_input().any_is_applying(K_LEFT, K_RIGHT, K_UP, K_DOWN, no_reset=True):
                     _x, _y = self.vertexes[self._interact_vertex_index]
                     _step = 10
 
-                    if get_input().is_hold(Input.K_CTRL):
+                    if get_input().is_hold(Input.GK_CTRL):
                         scale_interval = self._grid.scale_interval
 
                         _x = (_x // scale_interval) * scale_interval
@@ -61,13 +61,13 @@ class Curve:
 
                         _step = scale_interval
 
-                    if get_input().is_up(K_LEFT):
+                    if get_input().is_applying(K_LEFT):
                         self.vertexes[self._interact_vertex_index] = (_x - _step, _y)
-                    elif get_input().is_up(K_RIGHT):
+                    elif get_input().is_applying(K_RIGHT):
                         self.vertexes[self._interact_vertex_index] = (_x + _step, _y)
-                    elif get_input().is_up(K_UP):
+                    elif get_input().is_applying(K_UP):
                         self.vertexes[self._interact_vertex_index] = (_x, _y - _step)
-                    elif get_input().is_up(K_DOWN):
+                    elif get_input().is_applying(K_DOWN):
                         self.vertexes[self._interact_vertex_index] = (_x, _y + _step)
 
                     self._vertex_moved = True
