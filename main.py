@@ -31,7 +31,7 @@ input = Input()
 
 # Core stuff
 curve = Curve(RADIUS)
-grid = Grid(curve, 100, ANCHOR)
+grid = Grid(curve, 70, ANCHOR)
 
 while True:
     for e in pygame.event.get():
@@ -47,7 +47,7 @@ while True:
     # Render
     surface.fill(theme.BG_COLOR)
 
-    grid.render(surface, theme.BG_ACCENT_COLOR, display.get_window_size(), WIDTH, RADIUS)
+    grid.render(surface, theme.BG_ACCENT_COLOR, theme.BG_NOT_ACCENT_COLOR, display.get_window_size(), WIDTH, RADIUS)
     curve.render(surface, WIDTH)
 
     surface.blit(render_text(f'fps: {clock.get_fps():.3f}', theme.TEXT_COLOR), (0, 0))

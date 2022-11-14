@@ -19,6 +19,7 @@ class Grid:
 
         self.scale_interval = scale_interval
         self.pos = [0, 0]
+        self.scale = 1.0
 
     def to_intervalized_x(self, x: float | int):
         return (self.pos[0] + x) / self.scale_interval - 1
@@ -56,7 +57,10 @@ class Grid:
         return new_points
 
     def prerender(self):
-        if get_mouse().middle_is_hold and get_mouse().is_moved:
+        if get_mouse().is_wheel:
+            self.scale += get_mouse().wheel[1] / 10
+
+        if get_mouse().right_is_hold and get_mouse().is_moved:
             self.pos[0] += get_mouse().rel[0]
             self.pos[1] += get_mouse().rel[1]
 
@@ -87,6 +91,7 @@ class Grid:
             self,
             surface: SurfaceType,
             color: colorValue,
+            subcolor: colorValue,
             size: Sequence,
             line_width: int,
             text_margin: float | int
