@@ -22,28 +22,28 @@ class Grid:
         self.scale = 1.0
 
     def to_intervalized_x(self, x: float | int):
-        return (self.pos[0] + x) / self.scale_interval - 1
+        return (self.pos[0] + x) / self.scale_interval / self.scale - 1
 
     def to_intervalized_y(self, y: float | int):
-        return (self._anchor[1] - self.pos[1] - y) / self.scale_interval - 1
+        return self._anchor[1] / self.scale_interval - (self.pos[1] + y) / self.scale_interval / self.scale
 
     def to_intervalized_pos(self, pos: Sequence):
         return self.to_intervalized_x(pos[0]), self.to_intervalized_y(pos[1])
 
     def to_grid_x(self, x: float | int):
-        return self.pos[0] + x
+        return self.pos[0] + x / self.scale
 
     def to_grid_y(self, y: float | int):
-        return self.pos[1] + y
+        return self.pos[1] + y / self.scale
 
     def to_grid_pos(self, pos: Sequence):
         return self.to_grid_x(pos[0]), self.to_grid_y(pos[1])
 
     def from_grid_x(self, x: float | int):
-        return x - self.pos[0]
+        return x * self.scale - self.pos[0]
 
     def from_grid_y(self, y: float | int):
-        return y - self.pos[1]
+        return y * self.scale - self.pos[1]
 
     def from_grid_pos(self, pos: Sequence):
         return self.from_grid_x(pos[0]), self.from_grid_y(pos[1])
@@ -96,11 +96,11 @@ class Grid:
             line_width: int,
             text_margin: float | int
     ):
-        intervalized_start_x = ceil(self.pos[0] / self.scale_interval)
+        intervalized_start_x = ceil(self.pos[0] / self.scale_interval / self.scale)
 
         # Draw vertical lines
-        for step in range(intervalized_start_x, ceil(size[0] / self.scale_interval) + intervalized_start_x + 1):
-            x = step * self.scale_interval - self.pos[0]
+        for step in range(intervalized_start_x, ceil(size[0] / self.scale_interval / self.scale) + intervalized_start_x + 1):
+            x = step * self.scale_interval * self.scale - self.pos[0]
 
             text = float(step - 1).__str__()
             text_size = get_buffered_font().size(text)
@@ -110,11 +110,11 @@ class Grid:
 
             surface.blit(render_text(text, color), text_pos)
 
-        intervalized_start_y = ceil(self.pos[1] / self.scale_interval)
+        intervalized_start_y = ceil(self.pos[1] / self.scale_interval / self.scale)
 
         # Draw horizontal lines
-        for step in range(intervalized_start_y, ceil(size[1] / self.scale_interval) + intervalized_start_y + 1):
-            y = step * self.scale_interval - self.pos[1]
+        for step in range(intervalized_start_y, ceil(size[1] / self.scale_interval / self.scale) + intervalized_start_y + 1):
+            y = step * self.scale_interval * self.scale - self.pos[1]
 
             text = float(ceil(self._anchor[1] / self.scale_interval) - step - 1).__str__()
             text_height = get_buffered_font().get_height()
