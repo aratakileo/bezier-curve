@@ -1,5 +1,5 @@
+from pygame.constants import K_LEFT, K_RIGHT, K_UP, K_DOWN
 from pygex.text import render_text, get_buffered_font
-from pygame import K_LEFT, K_RIGHT, K_UP, K_DOWN
 from pygame.draw import line as draw_line
 from pygex.input import get_input, Input
 from pygame.surface import SurfaceType

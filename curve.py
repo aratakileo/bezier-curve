@@ -1,5 +1,5 @@
 from pygame.draw import line as draw_line, lines as draw_lines, circle as draw_circle, rect as draw_rect
-from pygame import K_TAB, K_ESCAPE, K_DELETE, K_BACKSPACE, K_UP, K_DOWN, K_LEFT, K_RIGHT
+from pygame.constants import K_TAB, K_ESCAPE, K_DELETE, K_BACKSPACE, K_UP, K_DOWN, K_LEFT, K_RIGHT
 from pygex.text import render_text, get_buffered_font
 from pygex.input import get_input, Input
 from pygame.surface import SurfaceType
