@@ -31,10 +31,10 @@ class Grid:
         return self.to_intervalized_x(pos[0]), self.to_intervalized_y(pos[1])
 
     def to_grid_x(self, x: float | int):
-        return self.pos[0] + x / self.scale
+        return (self.pos[0] + x) / self.scale
 
     def to_grid_y(self, y: float | int):
-        return self.pos[1] + y / self.scale
+        return (self.pos[1] + y) / self.scale
 
     def to_grid_pos(self, pos: Sequence):
         return self.to_grid_x(pos[0]), self.to_grid_y(pos[1])
