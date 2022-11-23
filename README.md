@@ -1,6 +1,6 @@
 # Bezier curve
 
-Bezier curve editor/generator
+Bezier curve editor
 
 ### Requirements
 - `python >= 3.10`
