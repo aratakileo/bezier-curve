@@ -1,7 +1,8 @@
-from pygame.draw import line as draw_line, lines as draw_lines, circle as draw_circle, rect as draw_rect
 from pygame.constants import K_TAB, K_ESCAPE, K_DELETE, K_BACKSPACE, K_UP, K_DOWN, K_LEFT, K_RIGHT
-from pygex.text import render_text, get_buffered_font
+from pygame.draw import line as draw_line, lines as draw_lines, circle as draw_circle
+from pygame.display import get_window_size
 from pygex.input import get_input, Input
+from pygex.draw import hint as draw_hint
 from pygame.surface import SurfaceType
 from pygex.math import generate_curve
 from pygex.mouse import get_mouse
@@ -204,22 +205,20 @@ class Curve:
             if self.is_tip(self._interact_vertex_index):
                 padding = 3
                 x, y = render_vertexes[self._interact_vertex_index]
-                text = f'{get_grid().to_intervalized_x(x):.3f}, {get_grid().to_intervalized_y(y):.3f}'
-                textw, texth = get_buffered_font().size(text)
-                render_pos = x - textw / 2, y - texth - self._vertex_radius
-
-                draw_rect(
+                hint(
                     surface,
-                    0x000000,
+                    f'{get_grid().to_intervalized_x(x):.3f}, {get_grid().to_intervalized_y(y):.3f}',
+                    20,
                     (
-                        render_pos[0] - padding * 2,
-                        render_pos[1] - padding * 2,
-                        textw + padding * 2,
-                        texth + padding * 2),
-                    0,
-                    5
+                        x - self._vertex_radius,
+                        y - self._vertex_radius,
+                        self._vertex_radius * 2,
+                        self._vertex_radius * 2
+                    ),
+                    (0, 0, *get_window_size()),
+                    upper=True,
+                    strict_fit_in=True
                 )
-                surface.blit(render_text(text, 0xffffff), (render_pos[0] - padding, render_pos[1] - padding))
 
 
 def fix_vertexes_ends(start_vertex: Sequence, end_vertex: Sequence, min_dist: float | int):
