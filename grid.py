@@ -2,9 +2,9 @@ from pygame.constants import K_LEFT, K_RIGHT, K_UP, K_DOWN
 from pygex.text import render_text, get_buffered_font
 from pygame.draw import line as draw_line
 from pygex.input import get_input, Input
+from pygex.mouse import get_mouse, Mouse
 from pygame.surface import SurfaceType
 from pygex.color import colorValue
-from pygex.mouse import get_mouse
 from typing import Sequence
 from math import ceil
 
@@ -19,13 +19,14 @@ class Grid:
 
         self.scale_interval = scale_interval
         self.pos = [0, 0]
-        self.scale = 1.0
+        self.scale = 10.0
+        self.scaling_density = 10
 
     def to_intervalized_x(self, x: float | int):
-        return (self.pos[0] + x) / self.scale_interval / self.scale - 1
+        return (self.pos[0] + x) * 10 / self.scale_interval / self.scale - 1
 
     def to_intervalized_y(self, y: float | int):
-        return self._anchor[1] / self.scale_interval - (self.pos[1] + y) / self.scale_interval / self.scale
+        return self._anchor[1] / self.scale_interval - (self.pos[1] + y) * 10 / self.scale_interval / self.scale
 
     def to_intervalized_pos(self, pos: Sequence):
         return self.to_intervalized_x(pos[0]), self.to_intervalized_y(pos[1])
@@ -58,11 +59,16 @@ class Grid:
 
     def prerender(self):
         if get_mouse().is_wheel:
-            self.scale += get_mouse().wheel[1] / 10
+            new_scale = round(self.scale + get_mouse().wheel[1] / self.scaling_density, self.scaling_density)
+            self.scale = self.scale if new_scale < 1 or new_scale > 20 else new_scale
+
+        get_mouse().remove_flags(Mouse.FLAG_NO_BORDERS)
 
         if get_mouse().right_is_hold and get_mouse().is_moved:
             self.pos[0] += get_mouse().rel[0]
             self.pos[1] += get_mouse().rel[1]
+
+            get_mouse().add_flags(Mouse.FLAG_NO_BORDERS)
 
         if self._curve._interact_vertex_index is None and get_input().any_is_applying(
                 K_LEFT, K_RIGHT, K_UP, K_DOWN, no_reset=True
@@ -94,35 +100,99 @@ class Grid:
             subcolor: colorValue,
             size: Sequence,
             line_width: int,
-            text_margin: float | int
+            text_margin: int
     ):
-        intervalized_start_x = ceil(self.pos[0] / self.scale_interval / self.scale)
+        int_scale = int(self.scale)
 
-        # Draw vertical lines
-        for step in range(intervalized_start_x, ceil(size[0] / self.scale_interval / self.scale) + intervalized_start_x + 1):
-            x = step * self.scale_interval * self.scale - self.pos[0]
+        lim_scale = self.scale if self.scale < 2 else round(self.scale - int_scale + 1, self.scaling_density)
+        lim_scaled_interval = self.scale_interval * lim_scale
 
-            text = float(step - 1).__str__()
-            text_size = get_buffered_font().size(text)
-            text_pos = (x - text_size[0] - text_margin, size[1] - text_size[1])
+        scaled_interval = self.scale_interval * self.scale
+
+        square_center_off = lim_scaled_interval / 2
+
+        x_step_off = (int(self.pos[0] / lim_scaled_interval) - self.pos[0] / lim_scaled_interval)
+        y_step_off = (int(self.pos[1] / lim_scaled_interval) - self.pos[1] / lim_scaled_interval)
+
+        x_poses = [
+            (x_step - 1) * 10 / int_scale for x_step in range(
+                ceil(self.pos[0] * 10 / scaled_interval),
+                ceil((self.pos[0] + size[0]) * 10 / scaled_interval) + 2
+            )
+        ]
+
+        y_poses = [
+            (self._anchor[1] * 10 / scaled_interval - y_step) * 10 / self.scale for y_step in range(
+                ceil(self.pos[1] * 10 / scaled_interval),
+                ceil((self.pos[1] + size[1]) * 10 / scaled_interval) + 2
+            )
+        ]
+
+        i = 0
+        for x_step in range(-(self.pos[0] < 0), ceil(size[0] / lim_scaled_interval) + (self.pos[0] >= 0)):
+            x = (x_step_off + x_step) * lim_scaled_interval
+
+            draw_line(surface, subcolor, (x + square_center_off, 0), (x + square_center_off, size[1]), line_width)
+
+            if lim_scale >= 1.5:
+                draw_line(
+                    surface,
+                    subcolor,
+                    (x + square_center_off / 2, 0),
+                    (x + square_center_off / 2, size[1]),
+                    line_width
+                )
+                draw_line(
+                    surface,
+                    subcolor,
+                    (x + square_center_off / 2 * 3, 0),
+                    (x + square_center_off / 2 * 3, size[1]),
+                    line_width
+                )
 
             draw_line(surface, color, (x, 0), (x, size[1]), line_width)
 
-            surface.blit(render_text(text, color), text_pos)
+            if i < len(x_poses) and x >= 0:
+                text = f'{x_poses[i]:.{max(1, self.scale // 10)}f}'
+                text_size = get_buffered_font().size(text)
+                text_pos = (x - text_size[0] - text_margin, size[1] - text_size[1])
 
-        intervalized_start_y = ceil(self.pos[1] / self.scale_interval / self.scale)
+                surface.blit(render_text(text, color), text_pos)
 
-        # Draw horizontal lines
-        for step in range(intervalized_start_y, ceil(size[1] / self.scale_interval / self.scale) + intervalized_start_y + 1):
-            y = step * self.scale_interval * self.scale - self.pos[1]
+                i += 1
 
-            text = float(ceil(self._anchor[1] / self.scale_interval) - step - 1).__str__()
-            text_height = get_buffered_font().get_height()
-            text_pos = (text_margin, y - text_height - text_margin)
+        i = 0
+        for y_step in range(-(self.pos[1] < 0), ceil(size[1] / lim_scaled_interval) + (self.pos[1] >= 0)):
+            y = (y_step_off + y_step) * lim_scaled_interval
+
+            draw_line(surface, subcolor, (0, y + square_center_off), (size[0], y + square_center_off), line_width)
+
+            if lim_scale >= 1.5:
+                draw_line(
+                    surface,
+                    subcolor,
+                    (0, y + square_center_off / 2),
+                    (size[0], y + square_center_off / 2),
+                    line_width
+                )
+                draw_line(
+                    surface,
+                    subcolor,
+                    (0, y + square_center_off / 2 * 3),
+                    (size[0], y + square_center_off / 2 * 3),
+                    line_width
+                )
 
             draw_line(surface, color, (0, y), (size[0], y), line_width)
 
-            surface.blit(render_text(text, color), text_pos)
+            if i < len(y_poses) and y >= 0:
+                text = f'{y_poses[i]:.{max(1, self.scale // 10)}f}'
+                text_size = get_buffered_font().size(text)
+                text_pos = (text_margin, y - text_size[1] - text_margin)
+
+                surface.blit(render_text(text, color), text_pos)
+
+                i += 1
 
 
 _active_grid: Grid | None = None

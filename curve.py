@@ -27,7 +27,7 @@ class Curve:
         return self.vertexes and (index == 0 or index == len(self.vertexes) - 1)
 
     def prerender(self):
-        mouse_pos = get_grid().to_grid_pos(get_mouse().get_pos())
+        mouse_pos = get_grid().to_grid_pos(get_mouse().pos)
 
         if self.vertexes:
             if get_input().is_applying(K_TAB):
@@ -50,10 +50,10 @@ class Curve:
                         self._need_regenerate_curve = True
                 elif get_input().any_is_applying(K_LEFT, K_RIGHT, K_UP, K_DOWN, no_reset=True):
                     _x, _y = self.vertexes[self._interact_vertex_index]
-                    _step = 10
+                    _step = 10 / get_grid().scale
 
                     if get_input().is_hold(Input.GK_CTRL):
-                        scale_interval = get_grid().scale_interval
+                        scale_interval = get_grid().scale_interval / get_grid().scale
 
                         _x = (_x // scale_interval) * scale_interval
                         _y = (_y // scale_interval) * scale_interval
