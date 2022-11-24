@@ -203,9 +203,8 @@ class Curve:
             )
 
             if self.is_tip(self._interact_vertex_index):
-                padding = 3
                 x, y = render_vertexes[self._interact_vertex_index]
-                hint(
+                draw_hint(
                     surface,
                     f'{get_grid().to_intervalized_x(x):.3f}, {get_grid().to_intervalized_y(y):.3f}',
                     20,
