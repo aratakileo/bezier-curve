@@ -133,14 +133,16 @@ class Grid:
                 subcolor,
                 lim_scaled_interval,
                 (0, 0, *size),
-                (self.pos[0] - lim_scaled_interval / 4, self.pos[1] - lim_scaled_interval / 4)
+                (self.pos[0] - lim_scaled_interval / 4, self.pos[1] - lim_scaled_interval / 4),
+                line_width
             )
             draw_grid(
                 surface,
                 subcolor,
                 lim_scaled_interval,
                 (0, 0, *size),
-                (self.pos[0] + lim_scaled_interval / 4, self.pos[1] + lim_scaled_interval / 4)
+                (self.pos[0] + lim_scaled_interval / 4, self.pos[1] + lim_scaled_interval / 4),
+                line_width
             )
 
         draw_grid(
@@ -148,7 +150,8 @@ class Grid:
             subcolor,
             lim_scaled_interval,
             (0, 0, *size),
-            (self.pos[0] - lim_scaled_interval / 2, self.pos[1] - lim_scaled_interval / 2)
+            (self.pos[0] - lim_scaled_interval / 2, self.pos[1] - lim_scaled_interval / 2),
+            line_width
         )
 
         draw_grid(
@@ -156,7 +159,8 @@ class Grid:
             color,
             lim_scaled_interval,
             (0, 0, *size),
-            self.pos
+            self.pos,
+            line_width
         )
 
         i = 0
