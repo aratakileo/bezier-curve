@@ -1,6 +1,7 @@
 from pygame.constants import K_LEFT, K_RIGHT, K_UP, K_DOWN
 from pygex.text import render_text, get_buffered_font
 from pygame.draw import line as draw_line
+from pygex.draw import grid as draw_grid
 from pygex.input import get_input, Input
 from pygex.mouse import get_mouse, Mouse
 from pygame.surface import SurfaceType
@@ -109,8 +110,6 @@ class Grid:
 
         scaled_interval = self.scale_interval * self.scale
 
-        square_center_off = lim_scaled_interval / 2
-
         x_step_off = (int(self.pos[0] / lim_scaled_interval) - self.pos[0] / lim_scaled_interval)
         y_step_off = (int(self.pos[1] / lim_scaled_interval) - self.pos[1] / lim_scaled_interval)
 
@@ -128,29 +127,41 @@ class Grid:
             )
         ]
 
+        if lim_scale >= 1.5:
+            draw_grid(
+                surface,
+                subcolor,
+                lim_scaled_interval,
+                (0, 0, *size),
+                (self.pos[0] - lim_scaled_interval / 4, self.pos[1] - lim_scaled_interval / 4)
+            )
+            draw_grid(
+                surface,
+                subcolor,
+                lim_scaled_interval,
+                (0, 0, *size),
+                (self.pos[0] + lim_scaled_interval / 4, self.pos[1] + lim_scaled_interval / 4)
+            )
+
+        draw_grid(
+            surface,
+            subcolor,
+            lim_scaled_interval,
+            (0, 0, *size),
+            (self.pos[0] - lim_scaled_interval / 2, self.pos[1] - lim_scaled_interval / 2)
+        )
+
+        draw_grid(
+            surface,
+            color,
+            lim_scaled_interval,
+            (0, 0, *size),
+            self.pos
+        )
+
         i = 0
         for x_step in range(-(self.pos[0] < 0), ceil(size[0] / lim_scaled_interval) + (self.pos[0] >= 0)):
             x = (x_step_off + x_step) * lim_scaled_interval
-
-            draw_line(surface, subcolor, (x + square_center_off, 0), (x + square_center_off, size[1]), line_width)
-
-            if lim_scale >= 1.5:
-                draw_line(
-                    surface,
-                    subcolor,
-                    (x + square_center_off / 2, 0),
-                    (x + square_center_off / 2, size[1]),
-                    line_width
-                )
-                draw_line(
-                    surface,
-                    subcolor,
-                    (x + square_center_off / 2 * 3, 0),
-                    (x + square_center_off / 2 * 3, size[1]),
-                    line_width
-                )
-
-            draw_line(surface, color, (x, 0), (x, size[1]), line_width)
 
             if i < len(x_poses) and x >= 0:
                 text = f'{x_poses[i]:.{max(1, self.scale // 10)}f}'
@@ -164,26 +175,6 @@ class Grid:
         i = 0
         for y_step in range(-(self.pos[1] < 0), ceil(size[1] / lim_scaled_interval) + (self.pos[1] >= 0)):
             y = (y_step_off + y_step) * lim_scaled_interval
-
-            draw_line(surface, subcolor, (0, y + square_center_off), (size[0], y + square_center_off), line_width)
-
-            if lim_scale >= 1.5:
-                draw_line(
-                    surface,
-                    subcolor,
-                    (0, y + square_center_off / 2),
-                    (size[0], y + square_center_off / 2),
-                    line_width
-                )
-                draw_line(
-                    surface,
-                    subcolor,
-                    (0, y + square_center_off / 2 * 3),
-                    (size[0], y + square_center_off / 2 * 3),
-                    line_width
-                )
-
-            draw_line(surface, color, (0, y), (size[0], y), line_width)
 
             if i < len(y_poses) and y >= 0:
                 text = f'{y_poses[i]:.{max(1, self.scale // 10)}f}'
