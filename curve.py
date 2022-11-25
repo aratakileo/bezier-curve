@@ -83,7 +83,13 @@ class Curve:
 
             if get_mouse().left_is_up:
                 if dist(self._start_pos, self._end_pos) != 0:
-                    self.vertexes += fix_vertexes_ends(self._start_pos, self._end_pos, self._vertex_radius * 2)
+                    self.vertexes += fix_vertexes_ends(
+                        get_grid().from_grid_pos(self._start_pos),
+                        get_grid().from_grid_pos(self._end_pos),
+                        self._vertex_radius * 2 * 10 / get_grid().scale
+                    )
+                    self.vertexes[0] = get_grid().to_grid_pos(self.vertexes[0])
+                    self.vertexes[-1] = get_grid().to_grid_pos(self.vertexes[-1])
                     self._interact_vertex_index = 1
                     self._need_regenerate_curve = True
 
@@ -91,7 +97,7 @@ class Curve:
         elif get_mouse().left_is_down:
             i = 0
             for vertex in self.vertexes:
-                if dist(vertex, mouse_pos) < self._vertex_radius:
+                if dist(get_grid().from_grid_pos(vertex), get_grid().from_grid_pos(mouse_pos)) < self._vertex_radius:
                     self._interact_vertex_index = i
                     break
 
@@ -135,10 +141,12 @@ class Curve:
         if self._vertex_moved:
             if self.is_tip(self._interact_vertex_index):
                 self.vertexes[0], self.vertexes[-1] = fix_vertexes_ends(
-                    self.vertexes[0],
-                    self.vertexes[-1],
+                    get_grid().from_grid_pos(self.vertexes[0]),
+                    get_grid().from_grid_pos(self.vertexes[-1]),
                     self._vertex_radius * 2
                 )
+                self.vertexes[0] = get_grid().to_grid_pos(self.vertexes[0])
+                self.vertexes[-1] = get_grid().to_grid_pos(self.vertexes[-1])
             self._vertex_moved = False
 
         if self._need_regenerate_curve:
