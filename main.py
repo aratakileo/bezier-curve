@@ -1,6 +1,8 @@
 from pygex.text import bufferize_font, render_text
 from pygame.event import get as get_event
+from pygex.image import take_screenshot
 from pygame.constants import RESIZABLE
+from pygame.constants import K_F1
 from pygame import display
 from curve import Curve
 from grid import Grid
@@ -41,5 +43,8 @@ while True:
     curve.render(surface, WIDTH)
 
     surface.blit(render_text(f'fps: {get_clock().get_fps():.3f}', theme.TEXT_COLOR), (0, 0))
+
+    if get_input().is_up(K_F1):
+        take_screenshot()
 
     flip(theme.BG_COLOR, 60)
