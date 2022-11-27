@@ -1,6 +1,7 @@
 from pygame.event import get as get_event
 from pygame.constants import K_F1, K_F11
 from pygex.text import render_text
+from pygex.gui.toast import Toast
 from pygex import Window
 from curve import Curve
 from grid import Grid
@@ -19,6 +20,8 @@ WIDTH = 1
 window = Window(ANCHOR, 'Bezier curve', vsync=True)
 window.bg_color = theme.BG_COLOR
 window.fps_limit = 60
+
+fullscreen_toast = Toast('To exit full screen press [F11]')
 
 # Core stuff
 curve = Curve(RADIUS)
@@ -47,5 +50,10 @@ while True:
         window.take_screenshot()
     elif window.input.is_up(K_F11):
         window.fullscreen = not window.fullscreen
+
+        if window.fullscreen:
+            fullscreen_toast.show()
+        else:
+            fullscreen_toast.cancel()
 
     window.flip()
