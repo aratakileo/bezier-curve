@@ -215,7 +215,6 @@ class Curve:
                 draw_hint(
                     surface,
                     f'{get_grid().to_intervalized_x(x):.3f}, {get_grid().to_intervalized_y(y):.3f}',
-                    20,
                     (
                         x - self._vertex_radius,
                         y - self._vertex_radius,
