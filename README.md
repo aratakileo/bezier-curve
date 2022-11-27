@@ -19,6 +19,7 @@ Convenient and fast Bezier curve editor
 - Press <img src="https://github.com/teacondemns/static.pexty.xyz/blob/main/src/icon/controller/backspace.png?raw=true" height="15"/> or <img src="https://github.com/teacondemns/static.pexty.xyz/blob/main/src/icon/controller/del.png?raw=true" height="15"/> to remove selected vertex from curve
 - Press <img src="https://github.com/teacondemns/static.pexty.xyz/blob/main/src/icon/controller/esc.png?raw=true" height="15"/> to unselect the vertex of curve
 - Press <img src="https://github.com/teacondemns/static.pexty.xyz/blob/main/src/icon/controller/f1.png?raw=true" height="15"/> to take screenshot
+- Press <img src="https://github.com/teacondemns/static.pexty.xyz/blob/main/src/icon/controller/f11.png?raw=true" height="15"/> to toggle fullscreen mode
 
 ### Requirements
 - `python >= 3.10`
