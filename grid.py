@@ -1,6 +1,5 @@
 from pygame.constants import K_LEFT, K_RIGHT, K_UP, K_DOWN
-from pygex.text import render_text, get_buffered_font
-from pygame.draw import line as draw_line
+from pygex.text import render_text, get_text_size
 from pygex.draw import grid as draw_grid
 from pygex.input import get_input, Input
 from pygex.mouse import get_mouse, Mouse
@@ -169,7 +168,7 @@ class Grid:
 
             if i < len(x_poses) and x >= 0:
                 text = f'{x_poses[i]:.{max(1, self.scale // 10)}f}'
-                text_size = get_buffered_font().size(text)
+                text_size = get_text_size(text)
                 text_pos = (x - text_size[0] - text_margin, size[1] - text_size[1])
 
                 surface.blit(render_text(text, color), text_pos)
@@ -182,7 +181,7 @@ class Grid:
 
             if i < len(y_poses) and y >= 0:
                 text = f'{y_poses[i]:.{max(1, self.scale // 10)}f}'
-                text_size = get_buffered_font().size(text)
+                text_size = get_text_size(text)
                 text_pos = (text_margin, y - text_size[1] - text_margin)
 
                 surface.blit(render_text(text, color), text_pos)
