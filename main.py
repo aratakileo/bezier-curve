@@ -1,6 +1,6 @@
-from pygex.text import bufferize_font, render_text
 from pygame.event import get as get_event
 from pygame.constants import K_F1, K_F11
+from pygex.text import render_text
 from pygex import Window
 from curve import Curve
 from grid import Grid
@@ -19,8 +19,6 @@ WIDTH = 1
 window = Window(ANCHOR, 'Bezier curve', vsync=True)
 window.bg_color = theme.BG_COLOR
 window.fps_limit = 60
-
-bufferize_font(20)
 
 # Core stuff
 curve = Curve(RADIUS)
