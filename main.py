@@ -1,12 +1,9 @@
 from pygex.text import bufferize_font, render_text
 from pygame.event import get as get_event
-from pygex.image import take_screenshot
-from pygame.constants import RESIZABLE
-from pygame.constants import K_F1
-from pygame import display
+from pygame.constants import K_F1, K_F11
+from pygex import Window
 from curve import Curve
 from grid import Grid
-from pygex import *
 import theme
 
 
@@ -18,13 +15,11 @@ ANCHOR = (800, 800)
 RADIUS = 7
 WIDTH = 1
 
-# Pygame stuff
-display.set_caption("Bezier curve")
-display.set_mode(ANCHOR, RESIZABLE)
-
-surface = display.get_surface()
-
 # Pygex stuff
+window = Window(ANCHOR, 'Bezier curve', vsync=True)
+window.bg_color = theme.BG_COLOR
+window.fps_limit = 60
+
 bufferize_font(20)
 
 # Core stuff
@@ -33,18 +28,26 @@ grid = Grid(curve, 70, ANCHOR)
 
 while True:
     for e in get_event():
-        process_event(e)
+        window.process_event(e)
 
     grid.prerender()
     curve.prerender()
 
-    # Render
-    grid.render(surface, theme.BG_ACCENT_COLOR, theme.BG_NOT_ACCENT_COLOR, display.get_window_size(), WIDTH, RADIUS)
-    curve.render(surface, WIDTH)
+    grid.render(
+        window.surface,
+        theme.BG_ACCENT_COLOR,
+        theme.BG_NOT_ACCENT_COLOR,
+        window.size,
+        WIDTH,
+        RADIUS
+    )
+    curve.render(window.surface, WIDTH)
 
-    surface.blit(render_text(f'fps: {get_clock().get_fps():.3f}', theme.TEXT_COLOR), (0, 0))
+    window.surface.blit(render_text(f'fps: {window.fps:.3f}', theme.TEXT_COLOR), (0, 0))
 
-    if get_input().is_up(K_F1):
-        take_screenshot()
+    if window.input.is_up(K_F1):
+        window.take_screenshot()
+    elif window.input.is_up(K_F11):
+        window.fullscreen = not window.fullscreen
 
-    flip(theme.BG_COLOR, 60)
+    window.flip()
