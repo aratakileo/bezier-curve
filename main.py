@@ -1,10 +1,9 @@
 from pygame.event import get as get_event
 from pygame.constants import K_F1, K_F11
 from pygex.text import render_text
-from pygex.gui.toast import Toast
-from pygex import Window
 from curve import Curve
 from grid import Grid
+from pygex import *
 import theme
 
 
