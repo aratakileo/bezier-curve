@@ -18,8 +18,8 @@ class Curve:
         self._need_regenerate_curve = self._vertex_moved = self._new_vertex_quick_move = False
         self._curve_points = []
         self._vertex_radius = vertex_radius
-        self.hint = Hint(..., gravity=Hint.GRAVITY_RIGHT_OF_CENTER | Hint.GRAVITY_OVER_CENTER)
 
+        self.hint = Hint(..., gravity=Hint.GRAVITY_RIGHT_OF_CENTER | Hint.GRAVITY_OVER_CENTER)
         self.vertexes = []
 
     def is_not_line(self):
