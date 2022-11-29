@@ -2,10 +2,10 @@ from pygame.constants import K_TAB, K_ESCAPE, K_DELETE, K_BACKSPACE, K_UP, K_DOW
 from pygame.draw import line as draw_line, lines as draw_lines, circle as draw_circle
 from pygame.display import get_window_size
 from pygex.input import get_input, Input
-from pygex.draw import hint as draw_hint
 from pygame.surface import SurfaceType
 from pygex.math import generate_curve
 from pygex.mouse import get_mouse
+from pygex.gui.hint import Hint
 from typing import Sequence
 from grid import get_grid
 from math import dist
@@ -18,6 +18,7 @@ class Curve:
         self._need_regenerate_curve = self._vertex_moved = self._new_vertex_quick_move = False
         self._curve_points = []
         self._vertex_radius = vertex_radius
+        self.hint = Hint(..., is_upper=True)
 
         self.vertexes = []
 
@@ -212,18 +213,16 @@ class Curve:
 
             if self.is_tip(self._interact_vertex_index):
                 x, y = render_vertexes[self._interact_vertex_index]
-                draw_hint(
+                self.hint.text = f'{get_grid().to_intervalized_x(x):.3f}, {get_grid().to_intervalized_y(y):.3f}'
+                self.hint.render(
                     surface,
-                    f'{get_grid().to_intervalized_x(x):.3f}, {get_grid().to_intervalized_y(y):.3f}',
                     (
                         x - self._vertex_radius,
                         y - self._vertex_radius,
                         self._vertex_radius * 2,
                         self._vertex_radius * 2
                     ),
-                    (0, 0, *get_window_size()),
-                    upper=True,
-                    strict_fit_in=True
+                    (0, 0, *get_window_size())
                 )
 
 
