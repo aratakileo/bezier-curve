@@ -2,8 +2,8 @@
 
 Convenient and fast Bezier curve editor. Editor has no limits for number of curve vertexes!
 
-![](https://github.com/teacondemns/bezier-curve/blob/main/preview/preview-1.png?raw=true)
-![](https://github.com/teacondemns/bezier-curve/blob/main/preview/preview-2.png?raw=true)
+![](preview/preview-1.png)
+![](preview/preview-2.png)
 
 ##### Navigation
 - [How to use](#how-to-use)
