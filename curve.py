@@ -50,7 +50,7 @@ class Curve:
                     else:
                         del self.vertexes[self._interact_vertex_index]
                         self._need_regenerate_curve = True
-                elif get_input().any_is_applying(K_LEFT, K_RIGHT, K_UP, K_DOWN, no_reset=True):
+                elif get_input().any_is_applying(K_LEFT, K_RIGHT, K_UP, K_DOWN, reset_data=False):
                     _x, _y = self.vertexes[self._interact_vertex_index]
                     _step = 10 / get_grid().scale
 

@@ -71,7 +71,7 @@ class Grid:
             get_mouse().add_flags(Mouse.FLAG_NO_BORDERS)
 
         if self._curve._interact_vertex_index is None and get_input().any_is_applying(
-                K_LEFT, K_RIGHT, K_UP, K_DOWN, no_reset=True
+                K_LEFT, K_RIGHT, K_UP, K_DOWN, reset_data=False
         ):
                 _x, _y = self.pos
                 _step = 10
