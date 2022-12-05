@@ -1,4 +1,3 @@
-from pygame.event import get as get_event
 from pygame.constants import K_F1, K_F11
 from pygex.text import render_text
 from curve import Curve
@@ -27,9 +26,6 @@ curve = Curve(RADIUS)
 grid = Grid(curve, 70, ANCHOR)
 
 while True:
-    for e in get_event():
-        window.process_event(e)
-
     grid.prerender()
     curve.prerender()
 
