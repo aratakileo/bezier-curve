@@ -1,7 +1,7 @@
 from pygame.constants import K_TAB, K_ESCAPE, K_DELETE, K_BACKSPACE, K_UP, K_DOWN, K_LEFT, K_RIGHT
 from pygame.draw import line as draw_line, lines as draw_lines, circle as draw_circle
 from pygame.display import get_window_size
-from pygex.input import get_input, Input
+from pygex.input import get_input, GK_CTRL
 from pygame.surface import SurfaceType
 from pygex.math import generate_curve
 from pygex.mouse import get_mouse
@@ -38,7 +38,7 @@ class Curve:
                 else:
                     self._interact_vertex_index += 1
             elif self._interact_vertex_index is not None:
-                get_input().try_start_observing(Input.GK_CTRL)
+                get_input().try_start_observing(GK_CTRL)
 
                 if get_input().is_up(K_ESCAPE):
                     self._interact_vertex_index = None
@@ -54,7 +54,7 @@ class Curve:
                     _x, _y = self.vertexes[self._interact_vertex_index]
                     _step = 10 / get_grid().scale
 
-                    if get_input().is_hold(Input.GK_CTRL):
+                    if get_input().is_hold(GK_CTRL):
                         scale_interval = get_grid().scale_interval / get_grid().scale
 
                         _x = (_x // scale_interval) * scale_interval

@@ -1,8 +1,8 @@
 from pygame.constants import K_LEFT, K_RIGHT, K_UP, K_DOWN
 from pygex.text import render_text, get_text_size
+from pygex.mouse import get_mouse, F_NO_BORDERS
+from pygex.input import get_input, GK_CTRL
 from pygex.draw import grid as draw_grid
-from pygex.input import get_input, Input
-from pygex.mouse import get_mouse, Mouse
 from pygame.surface import SurfaceType
 from pygex.color import colorValue
 from typing import Sequence
@@ -62,13 +62,13 @@ class Grid:
             new_scale = round(self.scale + get_mouse().wheel[1] / self.scaling_density, self.scaling_density)
             self.scale = self.scale if new_scale < 1 or new_scale > 20 else new_scale
 
-        get_mouse().remove_flags(Mouse.FLAG_NO_BORDERS)
+        get_mouse().remove_flags(F_NO_BORDERS)
 
         if get_mouse().right_is_hold and get_mouse().is_moved:
             self.pos[0] += get_mouse().rel[0]
             self.pos[1] += get_mouse().rel[1]
 
-            get_mouse().add_flags(Mouse.FLAG_NO_BORDERS)
+            get_mouse().add_flags(F_NO_BORDERS)
 
         if self._curve._interact_vertex_index is None and get_input().any_is_applying(
                 K_LEFT, K_RIGHT, K_UP, K_DOWN, reset_data=False
@@ -76,7 +76,7 @@ class Grid:
                 _x, _y = self.pos
                 _step = 10
 
-                if get_input().is_hold(Input.GK_CTRL):
+                if get_input().is_hold(GK_CTRL):
                     scale_interval = get_grid().scale_interval
 
                     _x = (_x // scale_interval) * scale_interval
