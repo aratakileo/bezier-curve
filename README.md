@@ -24,4 +24,4 @@ Convenient and fast Bezier curve editor. Editor has no limits for number of curv
 ### Requirements
 - `python >= 3.10`
 - `pygame >= 2.0.1`
-- [`pygex >= 0.2.dev1`](https://github.com/teacondemns/pygex)
+- [`pygex >= 0.3`](https://github.com/teacondemns/pygex)
