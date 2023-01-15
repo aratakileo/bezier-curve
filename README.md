@@ -1,6 +1,6 @@
 # Bezier curve
 
-Convenient and fast Bezier curve editor. Editor has no limits for number of curve vertexes!
+Convenient and fast Bézier curve editor. Editor has no limits for number of curve vertexes!
 
 ![](preview/preview-1.png)
 ![](preview/preview-2.png)
