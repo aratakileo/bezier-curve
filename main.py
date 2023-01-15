@@ -6,9 +6,6 @@ from pygex import *
 import theme
 
 
-start_pos = end_pos = interact_vertex_index = None
-vertexes = []
-
 # Constants
 ANCHOR = (800, 800)
 RADIUS = 7
