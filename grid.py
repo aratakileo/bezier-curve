@@ -4,7 +4,7 @@ from pygex.mouse import get_mouse, F_NO_BORDERS
 from pygex.input import get_input, GK_CTRL
 from pygex.draw import grid as draw_grid
 from pygame.surface import SurfaceType
-from pygex.color import colorValue
+from pygex.color import COLOR_TYPE
 from typing import Sequence
 from math import ceil
 
@@ -96,8 +96,8 @@ class Grid:
     def render(
             self,
             surface: SurfaceType,
-            color: colorValue,
-            subcolor: colorValue,
+            color: COLOR_TYPE,
+            subcolor: COLOR_TYPE,
             size: Sequence,
             line_width: int,
             text_margin: int
