@@ -1,4 +1,4 @@
-# Bezier curve
+# Bezier curve editor
 
 Convenient and fast Bézier curve editor. Editor has no limits for number of curve vertexes!
 
