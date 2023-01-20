@@ -167,7 +167,7 @@ class Grid:
             x = (x_step_off + x_step) * lim_scaled_interval
 
             if i < len(x_poses) and x >= 0:
-                text = f'{x_poses[i]:.{max(1, self.scale // 10)}f}'
+                text = f'{x_poses[i]:.1f}'
                 text_size = get_pygame_font().size(text)
                 text_pos = (x - text_size[0] - text_margin, size[1] - text_size[1])
 
@@ -180,7 +180,7 @@ class Grid:
             y = (y_step_off + y_step) * lim_scaled_interval
 
             if i < len(y_poses) and y >= 0:
-                text = f'{y_poses[i]:.{max(1, self.scale // 10)}f}'
+                text = f'{y_poses[i]:.1f}'
                 text_size = get_pygame_font().size(text)
                 text_pos = (text_margin, y - text_size[1] - text_margin)
 
