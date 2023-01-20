@@ -65,8 +65,8 @@ class Grid:
         get_mouse().remove_flags(F_NO_BORDERS)
 
         if get_mouse().right_is_hold and get_mouse().is_moved:
-            self.pos[0] += get_mouse().rel[0]
-            self.pos[1] += get_mouse().rel[1]
+            self.pos[0] += get_mouse().relx
+            self.pos[1] += get_mouse().rely
 
             get_mouse().add_flags(F_NO_BORDERS)
 
