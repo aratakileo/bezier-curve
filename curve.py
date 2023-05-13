@@ -1,26 +1,29 @@
 from pygame.constants import K_TAB, K_ESCAPE, K_DELETE, K_BACKSPACE, K_UP, K_DOWN, K_LEFT, K_RIGHT
 from pygame.draw import line as draw_line, lines as draw_lines, circle as draw_circle
+from pygex.interface import Flippable, Renderable
+from pygex.broker import get_input, get_mouse
 from pygame.display import get_window_size
-from pygex.input import get_input, GK_CTRL
 from pygame.surface import SurfaceType
 from pygex.math import generate_curve
-from pygex.mouse import get_mouse
-from pygex.gui.hint import Hint
+from pygex.input import GK_CTRL
 from typing import Sequence
 from grid import get_grid
+from pygex.gui import hint
 from math import dist
 import theme
 
 
-class Curve:
-    def __init__(self, vertex_radius: float | int):
+class Curve(Flippable, Renderable):
+    def __init__(self, vertex_radius: float | int, line_width: int):
         self._start_pos = self._end_pos = self._interact_vertex_index = None
         self._need_regenerate_curve = self._vertex_moved = self._new_vertex_quick_move = False
         self._curve_points = []
         self._vertex_radius = vertex_radius
 
-        self.hint = Hint(..., gravity=Hint.GRAVITY_RIGHT_OF_CENTER | Hint.GRAVITY_OVER_CENTER)
+        self.hint = hint.Hint(..., gravity=hint.GRAVITY_RIGHT_OF_CENTER | hint.GRAVITY_OVER_CENTER)
         self.vertexes = []
+
+        self.line_width = line_width
 
     def is_not_line(self):
         return len(self.vertexes) > 2
@@ -28,7 +31,7 @@ class Curve:
     def is_tip(self, index: int):
         return self.vertexes and (index == 0 or index == len(self.vertexes) - 1)
 
-    def prerender(self):
+    def flip(self):
         mouse_pos = get_grid().to_grid_pos(get_mouse().pos)
 
         if self.vertexes:
@@ -155,14 +158,14 @@ class Curve:
                 else generate_curve(self.vertexes, 200, True)
             self._need_regenerate_curve = False
 
-    def render(self, surface: SurfaceType, line_width: int):
+    def render(self, surface: SurfaceType):
         if not self.vertexes and get_mouse().left_is_hold:
             draw_line(
                 surface,
                 theme.ACCENT_COLOR,
                 get_grid().from_grid_pos(self._start_pos),
                 get_grid().from_grid_pos(self._end_pos),
-                line_width
+                self.line_width
             )
 
         render_vertexes = get_grid().from_grid_points(self.vertexes)
@@ -170,10 +173,10 @@ class Curve:
         if self._curve_points:
             if self.is_not_line():
                 if len(self.vertexes) == 4:
-                    draw_line(surface, theme.NOT_ACCENT_COLOR, *render_vertexes[:2], line_width)
-                    draw_line(surface, theme.NOT_ACCENT_COLOR, *render_vertexes[2:], line_width)
+                    draw_line(surface, theme.NOT_ACCENT_COLOR, *render_vertexes[:2], self.line_width)
+                    draw_line(surface, theme.NOT_ACCENT_COLOR, *render_vertexes[2:], self.line_width)
                 else:
-                    draw_lines(surface, theme.NOT_ACCENT_COLOR, False, render_vertexes, line_width)
+                    draw_lines(surface, theme.NOT_ACCENT_COLOR, False, render_vertexes, self.line_width)
 
                 index = 1
                 for vertex in render_vertexes[index:-1]:
@@ -182,7 +185,7 @@ class Curve:
                         theme.INTERACTION_COLOR if index == self._interact_vertex_index else theme.NOT_ACCENT_COLOR,
                         vertex,
                         self._vertex_radius,
-                        line_width
+                        self.line_width
                     )
                     index += 1
 
@@ -191,7 +194,7 @@ class Curve:
                 theme.ACCENT_COLOR,
                 False,
                 get_grid().from_grid_points(self._curve_points),
-                line_width
+                self.line_width
             )
 
             draw_circle(
@@ -200,7 +203,7 @@ class Curve:
                 else theme.ACCENT_COLOR,
                 render_vertexes[0],
                 self._vertex_radius,
-                line_width
+                self.line_width
             )
             draw_circle(
                 surface,
@@ -208,14 +211,13 @@ class Curve:
                 else theme.ACCENT_COLOR,
                 render_vertexes[-1],
                 self._vertex_radius,
-                line_width
+                self.line_width
             )
 
             if self.is_tip(self._interact_vertex_index):
                 x, y = render_vertexes[self._interact_vertex_index]
                 self.hint.text = f'{get_grid().to_intervalized_x(x):.3f}, {get_grid().to_intervalized_y(y):.3f}'
-                self.hint.render(
-                    surface,
+                self.hint.provide_show(
                     (
                         x - self._vertex_radius,
                         y - self._vertex_radius,
@@ -224,6 +226,9 @@ class Curve:
                     ),
                     (0, 0, *get_window_size())
                 )
+                self.hint.show()
+            else:
+                self.hint.hide()
 
 
 def fix_vertexes_ends(start_vertex: Sequence, end_vertex: Sequence, min_dist: float | int):

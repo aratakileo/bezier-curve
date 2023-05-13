@@ -1,16 +1,27 @@
 from pygame.constants import K_LEFT, K_RIGHT, K_UP, K_DOWN
+from pygex.broker import get_input, get_mouse, get_window
 from pygex.text import render_text, get_pygame_font
-from pygex.mouse import get_mouse, F_NO_BORDERS
-from pygex.input import get_input, GK_CTRL
+from pygex.interface import Flippable, Renderable
 from pygex.draw import grid as draw_grid
 from pygame.surface import SurfaceType
-from pygex.color import COLOR_TYPE
+from pygex.mouse import F_NO_BORDERS
+from pygex.color import TYPE_COLOR
+from pygex.input import GK_CTRL
 from typing import Sequence
 from math import ceil
 
 
-class Grid:
-    def __init__(self, curve, scale_interval: float | int, anchor: Sequence):
+class Grid(Flippable, Renderable):
+    def __init__(
+            self,
+            curve,
+            scale_interval: float | int,
+            anchor: Sequence,
+            color: TYPE_COLOR,
+            subcolor: TYPE_COLOR,
+            line_width: int,
+            text_margin: int
+    ):
         global _active_grid
         _active_grid = self
 
@@ -21,6 +32,8 @@ class Grid:
         self.pos = [0, 0]
         self.scale = 10.0
         self.scaling_density = 10
+        self.color, self.subcolor = color, subcolor
+        self.line_width, self.text_margin = line_width, text_margin
 
     def to_intervalized_x(self, x: float | int):
         return (self.pos[0] + x) * 10 / self.scale_interval / self.scale - 1
@@ -57,7 +70,7 @@ class Grid:
 
         return new_points
 
-    def prerender(self):
+    def flip(self):
         if get_mouse().is_wheel:
             new_scale = round(self.scale + get_mouse().wheel[1] / self.scaling_density, self.scaling_density)
             self.scale = self.scale if new_scale < 1 or new_scale > 20 else new_scale
@@ -93,15 +106,9 @@ class Grid:
                 elif get_input().is_applying(K_DOWN):
                     self.pos = [_x, _y + _step]
 
-    def render(
-            self,
-            surface: SurfaceType,
-            color: COLOR_TYPE,
-            subcolor: COLOR_TYPE,
-            size: Sequence,
-            line_width: int,
-            text_margin: int
-    ):
+    def render(self, surface: SurfaceType):
+        window = get_window()
+
         int_scale = int(self.scale)
 
         lim_scale = self.scale if self.scale < 2 else round(self.scale - int_scale + 1, self.scaling_density)
@@ -115,76 +122,76 @@ class Grid:
         x_poses = [
             (x_step - 1) * 10 / int_scale for x_step in range(
                 ceil(self.pos[0] * 10 / scaled_interval),
-                ceil((self.pos[0] + size[0]) * 10 / scaled_interval) + 2
+                ceil((self.pos[0] + window.width) * 10 / scaled_interval) + 2
             )
         ]
 
         y_poses = [
             (self._anchor[1] * 10 / scaled_interval - y_step) * 10 / self.scale for y_step in range(
                 ceil(self.pos[1] * 10 / scaled_interval),
-                ceil((self.pos[1] + size[1]) * 10 / scaled_interval) + 2
+                ceil((self.pos[1] + window.height) * 10 / scaled_interval) + 2
             )
         ]
 
         if lim_scale >= 1.5:
             draw_grid(
                 surface,
-                subcolor,
+                self.subcolor,
                 lim_scaled_interval,
-                (0, 0, *size),
+                (0, 0, *window.size),
                 (self.pos[0] - lim_scaled_interval / 4, self.pos[1] - lim_scaled_interval / 4),
-                line_width
+                self.line_width
             )
             draw_grid(
                 surface,
-                subcolor,
+                self.subcolor,
                 lim_scaled_interval,
-                (0, 0, *size),
+                (0, 0, *window.size),
                 (self.pos[0] + lim_scaled_interval / 4, self.pos[1] + lim_scaled_interval / 4),
-                line_width
+                self.line_width
             )
 
         draw_grid(
             surface,
-            subcolor,
+            self.subcolor,
             lim_scaled_interval,
-            (0, 0, *size),
+            (0, 0, *window.size),
             (self.pos[0] - lim_scaled_interval / 2, self.pos[1] - lim_scaled_interval / 2),
-            line_width
+            self.line_width
         )
 
         draw_grid(
             surface,
-            color,
+            self.color,
             lim_scaled_interval,
-            (0, 0, *size),
+            (0, 0, *window.size),
             self.pos,
-            line_width
+            self.line_width
         )
 
         i = 0
-        for x_step in range(-(self.pos[0] < 0), ceil(size[0] / lim_scaled_interval) + (self.pos[0] >= 0)):
+        for x_step in range(-(self.pos[0] < 0), ceil(window.size[0] / lim_scaled_interval) + (self.pos[0] >= 0)):
             x = (x_step_off + x_step) * lim_scaled_interval
 
             if i < len(x_poses) and x >= 0:
                 text = f'{x_poses[i]:.1f}'
                 text_size = get_pygame_font().size(text)
-                text_pos = (x - text_size[0] - text_margin, size[1] - text_size[1])
+                text_pos = (x - text_size[0] - self.text_margin, window.height - text_size[1])
 
-                surface.blit(render_text(text, color), text_pos)
+                surface.blit(render_text(text, self.color), text_pos)
 
                 i += 1
 
         i = 0
-        for y_step in range(-(self.pos[1] < 0), ceil(size[1] / lim_scaled_interval) + (self.pos[1] >= 0)):
+        for y_step in range(-(self.pos[1] < 0), ceil(window.height / lim_scaled_interval) + (self.pos[1] >= 0)):
             y = (y_step_off + y_step) * lim_scaled_interval
 
             if i < len(y_poses) and y >= 0:
                 text = f'{y_poses[i]:.1f}'
                 text_size = get_pygame_font().size(text)
-                text_pos = (text_margin, y - text_size[1] - text_margin)
+                text_pos = (self.text_margin, y - text_size[1] - self.text_margin)
 
-                surface.blit(render_text(text, color), text_pos)
+                surface.blit(render_text(text, self.color), text_pos)
 
                 i += 1
 
