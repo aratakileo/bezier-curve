@@ -35,7 +35,7 @@ window.add_renderable(curve.hint)
 
 debug_panel.apply_on_screen()
 
-while True:
+while window.is_running:
     window.render_views()
 
     if window.input.is_up(K_F1):
