@@ -1,7 +1,6 @@
+from pygex.core import get_input, get_mouse, get_window, Flippable, Renderable
 from pygame.constants import K_LEFT, K_RIGHT, K_UP, K_DOWN
-from pygex.broker import get_input, get_mouse, get_window
 from pygex.text import render_text, get_pygame_font
-from pygex.interface import Flippable, Renderable
 from pygex.draw import grid as draw_grid
 from pygame.surface import SurfaceType
 from pygex.mouse import F_NO_BORDERS

@@ -1,7 +1,6 @@
 from pygame.constants import K_TAB, K_ESCAPE, K_DELETE, K_BACKSPACE, K_UP, K_DOWN, K_LEFT, K_RIGHT
 from pygame.draw import line as draw_line, lines as draw_lines, circle as draw_circle
-from pygex.interface import Flippable, Renderable
-from pygex.broker import get_input, get_mouse
+from pygex.core import Flippable, Renderable, get_input, get_mouse
 from pygame.display import get_window_size
 from pygame.surface import SurfaceType
 from pygex.math import generate_curve
